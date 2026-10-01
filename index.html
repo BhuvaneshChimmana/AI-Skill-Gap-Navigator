@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI SkillGap Navigator – Career Intelligence Platform</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ───────────────────────────── TOKENS ───────────────────────────── */
+:root {
+  --bg: #0a0c10;
+  --bg2: #111520;
+  --bg3: #181d2a;
+  --bg4: #1f2637;
+  --border: rgba(255,255,255,.07);
+  --border2: rgba(255,255,255,.12);
+  --text: #e8eaf0;
+  --text2: #9aa3b8;
+  --text3: #5a6280;
+  --accent: #4f8ef7;
+  --accent2: #6c63ff;
+  --green: #22c55e;
+  --yellow: #f59e0b;
+  --red: #ef4444;
+  --purple: #a855f7;
+  --cyan: #06b6d4;
+  --card-shadow: 0 4px 24px rgba(0,0,0,.4);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --transition: .18s ease;
+  --sidebar-w: 260px;
+  --topbar-h: 64px;
+}
+[data-theme="light"] {
+  --bg: #f1f4f9;
+  --bg2: #ffffff;
+  --bg3: #f7f9fc;
+  --bg4: #edf0f7;
+  --border: rgba(0,0,0,.07);
+  --border2: rgba(0,0,0,.12);
+  --text: #1a2035;
+  --text2: #4a5470;
+  --text3: #9aa3b8;
+  --card-shadow: 0 4px 20px rgba(0,0,0,.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;transition:background var(--transition),color var(--transition)}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font-family:inherit}
+input,textarea,select{font-family:inherit}
+img{max-width:100%}
+/* ───────────────────────────── LAYOUT ───────────────────────────── */
+.app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:200;transition:transform var(--transition),background var(--transition)}
+.sidebar.collapsed{transform:translateX(-100%)}
+.main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column;transition:margin var(--transition)}
+.main.expanded{margin-left:0}
+/* ───────────────────────────── SIDEBAR ───────────────────────────── */
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.logo-text{font-size:14px;font-weight:700;letter-spacing:-.3px;line-height:1.2}
+.logo-sub{font-size:10px;color:var(--text2);font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+.sidebar-nav{padding:12px 0}
+.nav-section-label{padding:8px 20px 4px;font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13.5px;font-weight:500;color:var(--text2);cursor:pointer;transition:all var(--transition);position:relative;border-radius:0}
+.nav-item:hover{color:var(--text);background:var(--bg3)}
+.nav-item.active{color:var(--accent);background:rgba(79,142,247,.1)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:20%;height:60%;width:3px;background:var(--accent);border-radius:0 3px 3px 0}
+.nav-item i{width:18px;text-align:center;font-size:14px}
+.nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);margin-top:auto}
+.sidebar-user{display:flex;align-items:center;gap:10px}
+.user-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:11px;color:var(--text2)}
+/* ───────────────────────────── TOPBAR ───────────────────────────── */
+.topbar{height:var(--topbar-h);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100;transition:background var(--transition)}
+.topbar-toggle{width:36px;height:36px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:transparent;color:var(--text2);display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
+.topbar-toggle:hover{color:var(--text);border-color:var(--accent)}
+.topbar-title{font-size:16px;font-weight:600;flex:1}
+.topbar-subtitle{font-size:12px;color:var(--text2);font-weight:400}
+.topbar-actions{display:flex;align-items:center;gap:10px;margin-left:auto}
+.theme-toggle{width:36px;height:36px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:transparent;color:var(--text2);display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
+.theme-toggle:hover{color:var(--yellow);border-color:var(--yellow)}
+.score-pill{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;display:flex;align-items:center;gap:6px}
+/* ───────────────────────────── PAGE CONTENT ───────────────────────────── */
+.page-content{flex:1;padding:28px 28px 40px;max-width:1400px;width:100%}
+.page{display:none}
+.page.active{display:block}
+.page-header{margin-bottom:28px}
+.page-header h1{font-size:24px;font-weight:700;letter-spacing:-.5px}
+.page-header p{color:var(--text2);font-size:14px;margin-top:4px}
+/* ───────────────────────────── CARDS ───────────────────────────── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--card-shadow);transition:background var(--transition),border var(--transition)}
+.card-sm{padding:16px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.card-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.card-title i{color:var(--accent);font-size:13px}
+.card-meta{font-size:12px;color:var(--text3)}
+/* ───────────────────────────── GRID ───────────────────────────── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.col-span-2{grid-column:span 2}
+.col-span-3{grid-column:span 3}
+/* ───────────────────────────── STAT CARDS ───────────────────────────── */
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;transition:all var(--transition)}
+.stat-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.stat-card::after{content:'';position:absolute;top:0;right:0;width:80px;height:80px;background:var(--accent-color,var(--accent));opacity:.06;border-radius:50%;transform:translate(20px,-20px)}
+.stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:12px;background:rgba(79,142,247,.12);color:var(--accent)}
+.stat-value{font-size:28px;font-weight:800;letter-spacing:-1px;line-height:1}
+.stat-label{font-size:12px;color:var(--text2);margin-top:4px;font-weight:500}
+.stat-delta{font-size:11px;margin-top:8px;display:flex;align-items:center;gap:4px}
+.delta-up{color:var(--green)}
+.delta-down{color:var(--red)}
+/* ───────────────────────────── PROGRESS BAR ───────────────────────────── */
+.progress-bar{height:6px;background:var(--bg4);border-radius:20px;overflow:hidden}
+.progress-fill{height:100%;border-radius:20px;transition:width .6s ease}
+.skill-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.skill-name{font-size:13px;font-weight:500;width:160px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skill-bar-wrap{flex:1}
+.skill-level{font-size:12px;color:var(--text2);width:36px;text-align:right;flex-shrink:0}
+.skill-gap-indicator{font-size:10px;padding:2px 7px;border-radius:20px;flex-shrink:0;font-weight:600}
+.gap-high{background:rgba(239,68,68,.15);color:var(--red)}
+.gap-medium{background:rgba(245,158,11,.15);color:var(--yellow)}
+.gap-low{background:rgba(34,197,94,.15);color:var(--green)}
+.gap-none{background:rgba(34,197,94,.15);color:var(--green)}
+/* ───────────────────────────── SCORE RING ───────────────────────────── */
+.score-ring-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.score-ring{position:relative;width:160px;height:160px}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring-bg{fill:none;stroke:var(--bg4);stroke-width:12}
+.score-ring-fill{fill:none;stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset 1.2s ease}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-num{font-size:36px;font-weight:800;letter-spacing:-2px}
+.score-max{font-size:12px;color:var(--text2);margin-top:2px}
+.score-grade{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-top:4px}
+/* ───────────────────────────── BUTTONS ───────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;border:none;transition:all var(--transition);cursor:pointer;text-align:center;justify-content:center}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px)}
+.btn-secondary{background:var(--bg4);color:var(--text);border:1px solid var(--border2)}
+.btn-secondary:hover{background:var(--bg3);border-color:var(--accent)}
+.btn-success{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.btn-danger{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-lg{padding:13px 28px;font-size:14px;border-radius:var(--radius)}
+.btn-block{width:100%}
+/* ───────────────────────────── FORM ───────────────────────────── */
+.form-group{margin-bottom:18px}
+.form-label{font-size:13px;font-weight:600;margin-bottom:6px;display:block;color:var(--text2)}
+.form-input,.form-textarea,.form-select{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-size:13.5px;transition:all var(--transition);outline:none}
+.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.12)}
+.form-textarea{min-height:120px;resize:vertical;line-height:1.6}
+.form-select option{background:var(--bg2)}
+.form-hint{font-size:11px;color:var(--text3);margin-top:5px}
+.input-group{display:flex;gap:10px}
+.input-group .form-input{flex:1}
+/* ───────────────────────────── TAGS ───────────────────────────── */
+.tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:500;background:var(--bg4);color:var(--text2);border:1px solid var(--border)}
+.tag-accent{background:rgba(79,142,247,.12);color:var(--accent);border-color:rgba(79,142,247,.2)}
+.tag-green{background:rgba(34,197,94,.12);color:var(--green);border-color:rgba(34,197,94,.2)}
+.tag-red{background:rgba(239,68,68,.12);color:var(--red);border-color:rgba(239,68,68,.2)}
+.tag-yellow{background:rgba(245,158,11,.12);color:var(--yellow);border-color:rgba(245,158,11,.2)}
+.tag-purple{background:rgba(168,85,247,.12);color:var(--purple);border-color:rgba(168,85,247,.2)}
+.tag-cyan{background:rgba(6,182,212,.12);color:var(--cyan);border-color:rgba(6,182,212,.2)}
+.tags-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag .remove{cursor:pointer;opacity:.6;transition:opacity var(--transition)}
+.tag .remove:hover{opacity:1}
+/* ───────────────────────────── TIMELINE ───────────────────────────── */
+.timeline{position:relative;padding-left:24px}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border2)}
+.timeline-item{position:relative;margin-bottom:20px}
+.timeline-dot{position:absolute;left:-20px;top:4px;width:14px;height:14px;border-radius:50%;border:2px solid var(--bg2);background:var(--accent)}
+.timeline-dot.done{background:var(--green)}
+.timeline-dot.pending{background:var(--text3)}
+.timeline-dot.current{background:var(--yellow);box-shadow:0 0 0 4px rgba(245,158,11,.2)}
+.timeline-content{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px}
+.timeline-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.timeline-meta{font-size:11px;color:var(--text3);margin-bottom:6px}
+/* ───────────────────────────── ROADMAP ───────────────────────────── */
+.roadmap-week{margin-bottom:14px}
+.week-header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition)}
+.week-header:hover{border-color:var(--accent)}
+.week-num{font-size:11px;font-weight:700;background:var(--accent);color:#fff;padding:3px 8px;border-radius:20px}
+.week-title{font-size:13px;font-weight:600;flex:1}
+.week-toggle{color:var(--text3);transition:transform var(--transition)}
+.week-body{display:none;padding:10px 14px;border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm)}
+.week-body.open{display:block}
+.task-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.task-item:last-child{border-bottom:none}
+.task-check{width:18px;height:18px;border:2px solid var(--border2);border-radius:4px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all var(--transition);margin-top:1px}
+.task-check.checked{background:var(--green);border-color:var(--green);color:#fff;font-size:10px}
+.task-text{font-size:13px;flex:1}
+.task-tag{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;margin-left:auto;flex-shrink:0}
+/* ───────────────────────────── INTERVIEW PREP ───────────────────────────── */
+.question-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;transition:all var(--transition)}
+.question-card:hover{border-color:var(--border2)}
+.question-card .q-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.q-num{width:22px;height:22px;border-radius:6px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.q-text{font-size:13px;font-weight:500}
+.q-answer{font-size:12.5px;color:var(--text2);line-height:1.6;display:none;padding-top:8px;border-top:1px solid var(--border);margin-top:8px}
+.q-answer.visible{display:block}
+.q-toggle{margin-left:auto;font-size:11px;color:var(--accent);cursor:pointer;font-weight:600;flex-shrink:0}
+/* ───────────────────────────── TABS ───────────────────────────── */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px;gap:2px}
+.tab-btn{padding:9px 16px;font-size:13px;font-weight:500;color:var(--text2);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all var(--transition);margin-bottom:-1px}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-btn:hover{color:var(--text)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+/* ───────────────────────────── COMPARISON ───────────────────────────── */
+.compare-bar-wrap{margin-bottom:16px}
+.compare-bar-labels{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.compare-bars{display:flex;flex-direction:column;gap:4px}
+.compare-bar{height:8px;border-radius:20px;position:relative}
+.compare-bar-you{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.compare-bar-req{background:var(--bg4);border:1px solid var(--border2)}
+/* ───────────────────────────── ALERT ───────────────────────────── */
+.alert{padding:12px 16px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px}
+.alert i{flex-shrink:0;margin-top:2px}
+.alert-info{background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.2);color:var(--accent)}
+.alert-success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:var(--green)}
+.alert-warning{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:var(--yellow)}
+.alert-danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red)}
+/* ───────────────────────────── MISC ───────────────────────────── */
+.divider{height:1px;background:var(--border);margin:20px 0}
+.badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:20px;font-size:10px;font-weight:700;padding:0 6px}
+.badge-accent{background:var(--accent);color:#fff}
+.badge-green{background:var(--green);color:#fff}
+.badge-red{background:var(--red);color:#fff}
+.loading-spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:48px 24px;color:var(--text3)}
+.empty-state i{font-size:40px;margin-bottom:12px;display:block}
+.empty-state p{font-size:14px}
+.section-divider{display:flex;align-items:center;gap:12px;margin:24px 0}
+.section-divider span{white-space:nowrap;font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+/* pulse animation for AI analyzing */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.pulse{animation:pulse 1.5s ease infinite}
+/* glow effect */
+.glow{box-shadow:0 0 20px rgba(79,142,247,.25)}
+/* ───────────────────────────── WELCOME SCREEN ───────────────────────────── */
+.welcome-screen{min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px}
+.welcome-hero{font-size:48px;font-weight:800;letter-spacing:-2px;line-height:1.1;max-width:600px;margin-bottom:16px}
+.welcome-hero span{background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.welcome-sub{font-size:16px;color:var(--text2);max-width:500px;margin-bottom:36px;line-height:1.7}
+.welcome-steps{display:flex;gap:20px;margin-bottom:40px;flex-wrap:wrap;justify-content:center}
+.welcome-step{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;text-align:left;width:180px}
+.welcome-step-num{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px;letter-spacing:.5px}
+.welcome-step-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.welcome-step-desc{font-size:12px;color:var(--text2)}
+/* ───────────────────────────── TOAST ───────────────────────────── */
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px}
+.toast{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;box-shadow:var(--card-shadow);display:flex;align-items:center;gap:10px;min-width:260px;transform:translateX(120%);transition:transform .3s ease;border-left:3px solid var(--accent)}
+.toast.show{transform:translateX(0)}
+.toast.success{border-left-color:var(--green)}
+.toast.warning{border-left-color:var(--yellow)}
+.toast.error{border-left-color:var(--red)}
+/* ───────────────────────────── ONBOARDING WIZARD ───────────────────────────── */
+.wizard{max-width:680px;margin:0 auto}
+.wizard-steps{display:flex;gap:0;margin-bottom:32px;position:relative}
+.wizard-steps::before{content:'';position:absolute;top:16px;left:16px;right:16px;height:2px;background:var(--border2);z-index:0}
+.wizard-step-dot{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;z-index:1}
+.w-dot{width:32px;height:32px;border-radius:50%;border:2px solid var(--border2);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;transition:all var(--transition);color:var(--text3)}
+.w-dot.active{border-color:var(--accent);background:var(--accent);color:#fff}
+.w-dot.done{border-color:var(--green);background:var(--green);color:#fff}
+.w-label{font-size:11px;font-weight:500;color:var(--text3);text-align:center}
+.wizard-step-dot.active .w-label{color:var(--accent)}
+.wizard-step-dot.done .w-label{color:var(--green)}
+.wizard-pane{display:none}
+.wizard-pane.active{display:block}
+.wizard-nav{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
+/* ───────────────────────────── RESUME SCANNER ───────────────────────────── */
+.drop-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:40px;text-align:center;cursor:pointer;transition:all var(--transition)}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:rgba(79,142,247,.05)}
+.drop-zone i{font-size:32px;color:var(--text3);margin-bottom:12px;display:block}
+.drop-zone p{font-size:13px;color:var(--text2)}
+.drop-zone small{font-size:11px;color:var(--text3)}
+/* ───────────────────────────── RESPONSIVE ───────────────────────────── */
+@media(max-width:1100px){.grid-4{grid-template-columns:1fr 1fr}.grid-3{grid-template-columns:1fr 1fr}}
+@media(max-width:860px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0!important}.grid-2{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr}.grid-4{grid-template-columns:1fr 1fr}.col-span-2,.col-span-3{grid-column:span 1}.page-content{padding:16px}.welcome-hero{font-size:32px}}
+@media(max-width:520px){.grid-4{grid-template-columns:1fr}.wizard-steps{gap:4px}.w-label{display:none}}
+/* ───────────────────────────── CHART AREA ───────────────────────────── */
+.chart-wrap{position:relative;height:240px}
+.chart-wrap canvas{max-height:240px}
+/* ───────────────────────────── AI BADGE ───────────────────────────── */
+.ai-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:linear-gradient(135deg,rgba(79,142,247,.15),rgba(108,99,255,.15));color:var(--accent);border:1px solid rgba(79,142,247,.2)}
+/* ───────────────────────────── PROJECT CARDS ───────────────────────────── */
+.project-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:all var(--transition)}
+.project-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.project-diff{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:700}
+.diff-easy{background:rgba(34,197,94,.15);color:var(--green)}
+.diff-medium{background:rgba(245,158,11,.15);color:var(--yellow)}
+.diff-hard{background:rgba(239,68,68,.15);color:var(--red)}
+/* ───────────────────────────── SCROLLBAR ───────────────────────────── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:20px}
+/* ───────────────────────────── SKILLS INPUT ───────────────────────────── */
+.skill-chip{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:500;background:rgba(79,142,247,.1);color:var(--accent);border:1px solid rgba(79,142,247,.2);margin:3px}
+.skill-chip button{background:none;border:none;color:inherit;cursor:pointer;font-size:12px;padding:0;line-height:1;opacity:.7}
+.skill-chip button:hover{opacity:1}
+/* ───────────────────────────── MATCH METER ───────────────────────────── */
+.match-meter{background:var(--bg3);border:2px solid var(--border2);border-radius:var(--radius);padding:20px;text-align:center;position:relative;overflow:hidden}
+.match-pct{font-size:56px;font-weight:800;letter-spacing:-3px;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.match-label{font-size:13px;color:var(--text2);margin-top:4px}
+/* ───────────────────────────── NOTIFICATION DOT ───────────────────────────── */
+.notif-dot{width:8px;height:8px;background:var(--red);border-radius:50%;position:absolute;top:6px;right:6px}
+/* Print */
+@media print{.sidebar,.topbar,.topbar-actions{display:none}.main{margin:0}.page-content{padding:0}}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <!-- ─────────── SIDEBAR ─────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🧭</div>
+      <div>
+        <div class="logo-text">SkillGap AI</div>
+        <div class="logo-sub">Career Navigator</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" onclick="navigate('dashboard')"><i class="fa fa-chart-pie"></i>Dashboard</div>
+      <div class="nav-item" onclick="navigate('profile')"><i class="fa fa-user-circle"></i>My Profile</div>
+      <div class="nav-section-label">Analysis</div>
+      <div class="nav-item" onclick="navigate('scanner')"><i class="fa fa-file-search"></i>Resume Scanner</div>
+      <div class="nav-item" onclick="navigate('matcher')"><i class="fa fa-crosshairs"></i>Job Matcher</div>
+      <div class="nav-item" onclick="navigate('gaps')"><i class="fa fa-triangle-exclamation"></i>Skill Gaps <span class="nav-badge" id="gaps-badge">5</span></div>
+      <div class="nav-section-label">Growth</div>
+      <div class="nav-item" onclick="navigate('roadmap')"><i class="fa fa-route"></i>Learning Roadmap</div>
+      <div class="nav-item" onclick="navigate('action')"><i class="fa fa-calendar-check"></i>30-Day Plan</div>
+      <div class="nav-item" onclick="navigate('projects')"><i class="fa fa-code"></i>Projects</div>
+      <div class="nav-section-label">Preparation</div>
+      <div class="nav-item" onclick="navigate('interview')"><i class="fa fa-comments"></i>Interview Prep</div>
+      <div class="nav-item" onclick="navigate('compare')"><i class="fa fa-scale-balanced"></i>Career Compare</div>
+      <div class="nav-item" onclick="navigate('progress')"><i class="fa fa-chart-line"></i>Progress Tracker</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="user-avatar-sidebar">AJ</div>
+        <div class="user-info">
+          <div class="user-name" id="user-name-sidebar">Alex Johnson</div>
+          <div class="user-role" id="user-role-sidebar">Frontend → Full Stack</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ─────────── MAIN ─────────── -->
+  <div class="main" id="main">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="topbar-toggle" onclick="toggleSidebar()"><i class="fa fa-bars"></i></button>
+      <div>
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+        <div class="topbar-subtitle" id="topbar-subtitle">Career Intelligence Overview</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="score-pill" id="topbar-score"><i class="fa fa-star"></i><span id="topbar-score-val">72</span>/100</div>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"><i class="fa fa-moon" id="theme-icon"></i></button>
+        <button class="btn btn-primary btn-sm" onclick="navigate('profile')"><i class="fa fa-bolt"></i>Analyze</button>
+      </div>
+    </header>
+
+    <!-- PAGES -->
+    <div class="page-content">
+
+      <!-- ══════════════ DASHBOARD ══════════════ -->
+      <div class="page active" id="page-dashboard">
+        <div id="dashboard-welcome" style="display:none">
+          <div class="welcome-screen">
+            <div class="welcome-hero">Your <span>AI Career</span> Navigator</div>
+            <p class="welcome-sub">Analyze your skills, find gaps, get a personalized roadmap, and land your dream role faster with AI-powered career intelligence.</p>
+            <div class="welcome-steps">
+              <div class="welcome-step">
+                <div class="welcome-step-num">STEP 1</div>
+                <div class="welcome-step-title">Build Profile</div>
+                <div class="welcome-step-desc">Enter your skills, experience & target role</div>
+              </div>
+              <div class="welcome-step">
+                <div class="welcome-step-num">STEP 2</div>
+                <div class="welcome-step-title">Scan & Match</div>
+                <div class="welcome-step-desc">Paste your resume or a job description</div>
+              </div>
+              <div class="welcome-step">
+                <div class="welcome-step-num">STEP 3</div>
+                <div class="welcome-step-title">Get Roadmap</div>
+                <div class="welcome-step-desc">AI generates your personalized plan</div>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-lg" onclick="navigate('profile')"><i class="fa fa-rocket"></i>Get Started — It's Free</button>
+          </div>
+        </div>
+        <div id="dashboard-main">
+          <div class="page-header">
+            <h1>Career Dashboard</h1>
+            <p>AI-powered overview of your career readiness · Last updated <span id="last-updated">just now</span></p>
+          </div>
+
+          <!-- STAT CARDS -->
+          <div class="grid-4" style="margin-bottom:20px">
+            <div class="stat-card" style="--accent-color:var(--accent)">
+              <div class="stat-icon" style="background:rgba(79,142,247,.12);color:var(--accent)"><i class="fa fa-bullseye"></i></div>
+              <div class="stat-value" id="stat-score">72</div>
+              <div class="stat-label">Career Readiness Score</div>
+              <div class="stat-delta delta-up"><i class="fa fa-arrow-up"></i> +8 pts this week</div>
+            </div>
+            <div class="stat-card" style="--accent-color:var(--red)">
+              <div class="stat-icon" style="background:rgba(239,68,68,.12);color:var(--red)"><i class="fa fa-triangle-exclamation"></i></div>
+              <div class="stat-value" id="stat-gaps">5</div>
+              <div class="stat-label">Critical Skill Gaps</div>
+              <div class="stat-delta delta-down"><i class="fa fa-arrow-down"></i> 2 resolved</div>
+            </div>
+            <div class="stat-card" style="--accent-color:var(--green)">
+              <div class="stat-icon" style="background:rgba(34,197,94,.12);color:var(--green)"><i class="fa fa-check-circle"></i></div>
+              <div class="stat-value" id="stat-matched">14</div>
+              <div class="stat-label">Skills Matched</div>
+              <div class="stat-delta delta-up"><i class="fa fa-arrow-up"></i> +3 added</div>
+            </div>
+            <div class="stat-card" style="--accent-color:var(--purple)">
+              <div class="stat-icon" style="background:rgba(168,85,247,.12);color:var(--purple)"><i class="fa fa-calendar"></i></div>
+              <div class="stat-value" id="stat-days">18</div>
+              <div class="stat-label">Days to Target</div>
+              <div class="stat-delta"><i class="fa fa-clock" style="color:var(--text3)"></i> <span style="color:var(--text3)">Projected timeline</span></div>
+            </div>
+          </div>
+
+          <!-- CHARTS ROW -->
+          <div class="grid-2" style="margin-bottom:20px">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fa fa-radar-chart"></i>Skill Radar</div>
+                <div class="ai-badge">✨ AI Analysis</div>
+              </div>
+              <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fa fa-chart-bar"></i>Skill Gap Breakdown</div>
+                <div class="card-meta">by category</div>
+              </div>
+              <div class="chart-wrap"><canvas id="gapBarChart"></canvas></div>
+            </div>
+          </div>
+
+          <!-- SCORE + TOP GAPS -->
+          <div class="grid-2" style="margin-bottom:20px">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fa fa-gauge-high"></i>Readiness Score</div>
+                <span class="tag tag-accent" id="score-grade-tag">Good</span>
+              </div>
+              <div class="score-ring-wrap">
+                <div class="score-ring">
+                  <svg viewBox="0 0 160 160" width="160" height="160">
+                    <circle class="score-ring-bg" cx="80" cy="80" r="68"/>
+                    <circle class="score-ring-fill" id="score-ring-fill" cx="80" cy="80" r="68" stroke="url(#scoreGrad)" stroke-dasharray="427" stroke-dashoffset="427"/>
+                    <defs>
+                      <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#4f8ef7"/>
+                        <stop offset="100%" stop-color="#6c63ff"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div class="score-center">
+                    <div class="score-num" id="score-center-val">72</div>
+                    <div class="score-max">out of 100</div>
+                  </div>
+                </div>
+                <div style="width:100%">
+                  <div id="score-breakdown"></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fa fa-fire"></i>Top Priority Gaps</div>
+                <button class="btn btn-secondary btn-sm" onclick="navigate('gaps')">View All</button>
+              </div>
+              <div id="top-gaps-list"></div>
+            </div>
+          </div>
+
+          <!-- PROGRESS + QUICK ACTIONS -->
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fa fa-chart-line"></i>Progress Over Time</div>
+              </div>
+              <div class="chart-wrap"><canvas id="progressChart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title"><i class="fa fa-bolt"></i>Quick Actions</div></div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <button class="btn btn-secondary" onclick="navigate('scanner')"><i class="fa fa-file-search"></i>Scan My Resume</button>
+                <button class="btn btn-secondary" onclick="navigate('matcher')"><i class="fa fa-crosshairs"></i>Match to Job Description</button>
+                <button class="btn btn-secondary" onclick="navigate('roadmap')"><i class="fa fa-route"></i>View Learning Roadmap</button>
+                <button class="btn btn-secondary" onclick="navigate('action')"><i class="fa fa-calendar-check"></i>Open 30-Day Plan</button>
+                <button class="btn btn-secondary" onclick="navigate('interview')"><i class="fa fa-comments"></i>Practice Interviews</button>
+                <div class="divider"></div>
+                <button class="btn btn-primary" onclick="runAIAnalysis()"><i class="fa fa-robot"></i>Run Full AI Analysis</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════ PROFILE ══════════════ -->
+      <div class="page" id="page-profile">
+        <div class="page-header">
+          <h1>My Profile</h1>
+          <p>Define your current skills, experience, and career target — AI uses this to generate your personalized plan</p>
+        </div>
+        <div class="wizard" id="wizard">
+          <div class="wizard-steps">
+            <div class="wizard-step-dot active" id="wdot-1"><div class="w-dot active">1</div><div class="w-label">Basics</div></div>
+            <div class="wizard-step-dot" id="wdot-2"><div class="w-dot">2</div><div class="w-label">Skills</div></div>
+            <div class="wizard-step-dot" id="wdot-3"><div class="w-dot">3</div><div class="w-label">Experience</div></div>
+            <div class="wizard-step-dot" id="wdot-4"><div class="w-dot">4</div><div class="w-label">Target</div></div>
+          </div>
+
+          <!-- Pane 1 -->
+          <div class="wizard-pane active" id="wpane-1">
+            <div class="card">
+              <div class="card-title" style="margin-bottom:18px"><i class="fa fa-user"></i>Personal Info</div>
+              <div class="grid-2">
+                <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="p-name" placeholder="Alex Johnson" value="Alex Johnson"></div>
+                <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="p-email" placeholder="alex@example.com" value="alex@example.com"></div>
+              </div>
+              <div class="grid-2">
+                <div class="form-group"><label class="form-label">Current Title / Role</label><input class="form-input" id="p-title" placeholder="Frontend Developer" value="Frontend Developer"></div>
+                <div class="form-group"><label class="form-label">Years of Experience</label><select class="form-select" id="p-exp"><option>0–1 years</option><option selected>2–4 years</option><option>5–7 years</option><option>8–10 years</option><option>10+ years</option></select></div>
+              </div>
+              <div class="form-group"><label class="form-label">Education</label><select class="form-select" id="p-edu"><option>High School</option><option>Associate's</option><option selected>Bachelor's in CS/IT</option><option>Bachelor's in Other</option><option>Master's in CS/IT</option><option>Master's in Other</option><option>PhD</option><option>Bootcamp Graduate</option><option>Self-taught</option></select></div>
+              <div class="form-group"><label class="form-label">LinkedIn / Portfolio URL (optional)</label><input class="form-input" id="p-url" placeholder="https://github.com/you"></div>
+            </div>
+            <div class="wizard-nav"><span></span><button class="btn btn-primary" onclick="wizardNext(1)">Next: Skills <i class="fa fa-arrow-right"></i></button></div>
+          </div>
+
+          <!-- Pane 2 -->
+          <div class="wizard-pane" id="wpane-2">
+            <div class="card">
+              <div class="card-title" style="margin-bottom:4px"><i class="fa fa-code"></i>Current Skills</div>
+              <p style="font-size:12px;color:var(--text2);margin-bottom:16px">Rate yourself honestly — AI uses this to calculate your real gaps</p>
+              <div id="skill-input-area">
+                <div class="input-group" style="margin-bottom:12px">
+                  <input class="form-input" id="new-skill-input" placeholder="Type a skill (e.g. React, SQL, Python)…" onkeydown="if(event.key==='Enter'){addSkill()}">
+                  <button class="btn btn-secondary" onclick="addSkill()"><i class="fa fa-plus"></i>Add</button>
+                </div>
+                <div id="skill-chips" class="tags-wrap"></div>
+              </div>
+              <div class="divider"></div>
+              <div class="card-title" style="margin-bottom:12px;font-size:13px">Quick-add common skills:</div>
+              <div class="tags-wrap" id="quick-skills"></div>
+              <div class="divider"></div>
+              <div id="skill-sliders"></div>
+            </div>
+            <div class="wizard-nav">
+              <button class="btn btn-secondary" onclick="wizardBack(2)"><i class="fa fa-arrow-left"></i> Back</button>
+              <button class="btn btn-primary" onclick="wizardNext(2)">Next: Experience <i class="fa fa-arrow-right"></i></button>
+            </div>
+          </div>
+
+          <!-- Pane 3 -->
+          <div class="wizard-pane" id="wpane-3">
+            <div class="card">
+              <div class="card-title" style="margin-bottom:16px"><i class="fa fa-briefcase"></i>Work Experience & Achievements</div>
+              <div class="form-group">
+                <label class="form-label">Most Recent Project / Role Description</label>
+                <textarea class="form-textarea" id="p-recent" placeholder="Describe what you built or what you did in your last role or project…">Built and maintained React-based customer portal with 50k+ users, implemented REST API integrations, optimized Lighthouse score from 62 to 91, managed CI/CD pipelines using GitHub Actions.</textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Certifications & Courses</label>
+                <textarea class="form-textarea" id="p-certs" style="min-height:80px" placeholder="e.g. AWS Certified Developer, Meta Frontend Certificate…">Meta Frontend Developer Certificate (Coursera), JavaScript Algorithms (freeCodeCamp)</textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">GitHub / Notable Projects</label>
+                <input class="form-input" id="p-github" placeholder="Link or describe your key projects" value="github.com/alexj – 12 public repos, 380 contributions this year">
+              </div>
+            </div>
+            <div class="wizard-nav">
+              <button class="btn btn-secondary" onclick="wizardBack(3)"><i class="fa fa-arrow-left"></i> Back</button>
+              <button class="btn btn-primary" onclick="wizardNext(3)">Next: Target <i class="fa fa-arrow-right"></i></button>
+            </div>
+          </div>
+
+          <!-- Pane 4 -->
+          <div class="wizard-pane" id="wpane-4">
+            <div class="card">
+              <div class="card-title" style="margin-bottom:16px"><i class="fa fa-rocket"></i>Target Role & Goals</div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Target Role</label>
+                  <select class="form-select" id="p-target">
+                    <option>Full Stack Developer</option>
+                    <option>Backend Engineer</option>
+                    <option>DevOps Engineer</option>
+                    <option>Data Scientist</option>
+                    <option>ML Engineer</option>
+                    <option>Mobile Developer (React Native)</option>
+                    <option>Cloud Architect</option>
+                    <option>Engineering Manager</option>
+                    <option>Product Manager</option>
+                    <option>UI/UX Designer</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Target Company Size</label>
+                  <select class="form-select" id="p-company">
+                    <option>Startup (1–50)</option>
+                    <option selected>Scale-up (50–500)</option>
+                    <option>Mid-market (500–5k)</option>
+                    <option>Enterprise (5k+)</option>
+                    <option>FAANG / Tier-1</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Timeline Goal</label>
+                  <select class="form-select" id="p-timeline">
+                    <option>ASAP (1–3 months)</option>
+                    <option selected>3–6 months</option>
+                    <option>6–12 months</option>
+                    <option>1–2 years</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Learning Hours / Week</label>
+                  <select class="form-select" id="p-hours">
+                    <option>1–5 hrs</option>
+                    <option selected>5–10 hrs</option>
+                    <option>10–20 hrs</option>
+                    <option>20+ hrs</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Specific Goal or Dream Company</label>
+                <input class="form-input" id="p-dream" placeholder="e.g. Senior Dev at a product startup, or Google L5" value="Senior Full Stack Developer at a product-led startup">
+              </div>
+            </div>
+            <div class="wizard-nav">
+              <button class="btn btn-secondary" onclick="wizardBack(4)"><i class="fa fa-arrow-left"></i> Back</button>
+              <button class="btn btn-primary btn-lg" onclick="saveProfileAndAnalyze()"><i class="fa fa-robot"></i> Analyze My Career →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════ RESUME SCANNER ══════════════ -->
+      <div class="page" id="page-scanner">
+        <div class="page-header"><h1>Resume Scanner</h1><p>Paste or drop your resume — AI extracts skills and experience automatically</p></div>
+        <div class="grid-2">
+          <div>
+            <div class="card" style="margin-bottom:20px">
+              <div class="card-title" style="margin-bottom:16px"><i class="fa fa-file-text"></i>Paste Your Resume</div>
+              <textarea class="form-textarea" id="resume-text" style="min-height:280px;font-family:'JetBrains Mono',monospace;font-size:12px" placeholder="Paste your full resume text here…">Alex Johnson – Frontend Developer
+alex@example.com | github.com/alexj | linkedin.com/in/alexj
+
+EXPERIENCE
+Frontend Developer · TechCorp (2021–Present)
+- Built React dashboards used by 50,000+ customers
+- Implemented REST API integrations with Node.js backends
+- Reduced bundle size by 40% through code splitting
+- CI/CD with GitHub Actions; Docker containerization
+
+Junior Developer · Startup XYZ (2019–2021)
+- Developed responsive UIs in HTML/CSS/JavaScript
+- Collaborated on Python Flask backend features
+
+EDUCATION
+Bachelor of Science, Computer Science · State University (2019)
+
+SKILLS
+React, JavaScript, TypeScript, HTML, CSS, Node.js, Git, REST APIs, Docker, SQL (basic)
+
+CERTIFICATIONS
+Meta Frontend Developer Certificate · JavaScript Algorithms (freeCodeCamp)</textarea>
+              <button class="btn btn-primary btn-block" style="margin-top:12px" onclick="scanResume()"><i class="fa fa-robot"></i>Scan & Extract Skills</button>
+            </div>
+          </div>
+          <div>
+            <div class="card" id="scan-results" style="min-height:200px">
+              <div class="card-header"><div class="card-title"><i class="fa fa-microscope"></i>Scan Results</div><span id="scan-score-badge" class="tag" style="display:none"></span></div>
+              <div id="scan-output">
+                <div class="empty-state"><i class="fa fa-file-search"></i><p>Paste your resume and click Scan to extract skills, identify strengths, and find gaps automatically.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════ JOB MATCHER ══════════════ -->
+      <div class="page" id="page-matcher">
+        <div class="page-header"><h1>Job Description Matcher</h1><p>Paste any job posting — AI compares it against your profile and calculates your match score</p></div>
+        <div class="grid-2">
+          <div>
+            <div class="card">
+              <div class="card-title" style="margin-bottom:16px"><i class="fa fa-file-contract"></i>Paste Job Description</div>
+              <textarea class="form-textarea" id="jd-text" style="min-height:300px;font-size:12px" placeholder="Paste the full job description here…">Senior Full Stack Engineer – TechStartup Inc.
+
+We're looking for a Senior Full Stack Engineer to join our product team.
+
+Requirements:
+- 4+ years experience with React and TypeScript
+- Strong Node.js / Express.js backend skills
+- PostgreSQL and Redis experience
+- AWS (EC2, S3, Lambda) or similar cloud platform
+- GraphQL API design and implementation
+- Docker & Kubernetes orchestration
+- CI/CD pipelines (GitHub Actions or similar)
+- System design and scalability experience
+- Experience with microservices architecture
+- Testing (Jest, Cypress, or similar)
+- Strong problem-solving and communication skills
+
+Nice to have:
+- Python scripting experience
+- Kafka or message queue experience
+- Previous startup experience</textarea>
+              <button class="btn btn-primary btn-block" style="margin-top:12px" onclick="matchJob()"><i class="fa fa-crosshairs"></i>Match Against My Profile</button>
+            </div>
+          </div>
+          <div>
+            <div class="card" id="match-results-card">
+              <div class="card-header"><div class="card-title"><i class="fa fa-chart-pie"></i>Match Analysis</div></div>
+              <div id="match-output">
+                <div class="empty-state"><i class="fa fa-crosshairs"></i><p>Paste a job description and click Match to see your compatibility score, matched skills, and what you need to learn.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════ SKILL GAPS ══════════════ -->
+      <div class="page" id="page-gaps">
+        <div class="page-header"><h1>Skill Gap Analysis</h1><p>AI-identified gaps between your current skills and your target role requirements</p></div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('gaps','critical')">🔴 Critical</button>
+          <button class="tab-btn" onclick="switchTab('gaps','moderate')">🟡 Moderate</button>
+          <button class="tab-btn" onclick="switchTab('gaps','minor')">🟢 Minor</button>
+          <button class="tab-btn" onclick="switchTab('gaps','strengths')">⭐ Strengths</button>
+        </div>
+        <div class="tab-content active" id="tab-gaps-critical"><div id="gaps-critical-list"></div></div>
+        <div class="tab-content" id="tab-gaps-moderate"><div id="gaps-moderate-list"></div></div>
+        <div class="tab-content" id="tab-gaps-minor"><div id="gaps-minor-list"></div></div>
+        <div class="tab-content" id="tab-gaps-strengths"><div id="gaps-strengths-list"></div></div>
+      </div>
+
+      <!-- ══════════════ ROADMAP ══════════════ -->
+      <div class="page" id="page-roadmap">
+        <div class="page-header"><h1>Learning Roadmap</h1><p>Personalized week-by-week curriculum to reach your target role</p></div>
+        <div class="grid-2" style="margin-bottom:20px">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:12px"><i class="fa fa-road"></i>Roadmap Overview</div>
+            <div class="chart-wrap"><canvas id="roadmapGantt"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:12px"><i class="fa fa-trophy"></i>Milestones</div>
+            <div id="milestones-list"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><i class="fa fa-calendar-week"></i>Week-by-Week Curriculum</div><div class="ai-badge">✨ AI Generated</div></div>
+          <div id="roadmap-weeks" style="margin-top:8px"></div>
+        </div>
+      </div>
+
+      <!-- ══════════════ 30-DAY PLAN ══════════════ -->
+      <div class="page" id="page-action">
+        <div class="page-header"><h1>30-Day Action Plan</h1><p>Daily micro-tasks to accelerate your skill-building — check off as you complete them</p></div>
+        <div class="grid-4" style="margin-bottom:20px">
+          <div class="stat-card"><div class="stat-icon" style="color:var(--green)"><i class="fa fa-check-double"></i></div><div class="stat-value" id="tasks-done-count">0</div><div class="stat-label">Tasks Completed</div></div>
+          <div class="stat-card"><div class="stat-icon" style="color:var(--accent)"><i class="fa fa-list-check"></i></div><div class="stat-value" id="tasks-total-count">30</div><div class="stat-label">Total Tasks</div></div>
+          <div class="stat-card"><div class="stat-icon" style="color:var(--yellow)"><i class="fa fa-fire"></i></div><div class="stat-value" id="tasks-streak">3</div><div class="stat-label">Day Streak 🔥</div></div>
+          <div class="stat-card"><div class="stat-icon" style="color:var(--purple)"><i class="fa fa-percent"></i></div><div class="stat-value" id="tasks-pct">0%</div><div class="stat-label">Plan Progress</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><i class="fa fa-calendar-days"></i>Daily Tasks</div><button class="btn btn-secondary btn-sm" onclick="resetTasks()"><i class="fa fa-rotate-left"></i>Reset</button></div>
+          <div style="margin-bottom:12px"><div class="progress-bar"><div class="progress-fill" id="plan-progress-bar" style="width:0%;background:linear-gradient(90deg,var(--accent),var(--green))"></div></div></div>
+          <div id="action-plan-list"></div>
+        </div>
+      </div>
+
+      <!-- ══════════════ PROJECTS ══════════════ -->
+      <div class="page" id="page-projects">
+        <div class="page-header"><h1>Project Recommendations</h1><p>AI-curated projects that fill your specific skill gaps and build your portfolio</p></div>
+        <div id="projects-grid" class="grid-3"></div>
+      </div>
+
+      <!-- ══════════════ INTERVIEW ══════════════ -->
+      <div class="page" id="page-interview">
+        <div class="page-header"><h1>Interview Preparation</h1><p>Targeted questions and model answers for your target role</p></div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('interview','technical')">⚙️ Technical</button>
+          <button class="tab-btn" onclick="switchTab('interview','behavioral')">🧠 Behavioral</button>
+          <button class="tab-btn" onclick="switchTab('interview','system')">🏗️ System Design</button>
+          <button class="tab-btn" onclick="switchTab('interview','hr')">💬 HR / Culture</button>
+        </div>
+        <div class="tab-content active" id="tab-interview-technical"><div id="interview-technical-list"></div></div>
+        <div class="tab-content" id="tab-interview-behavioral"><div id="interview-behavioral-list"></div></div>
+        <div class="tab-content" id="tab-interview-system"><div id="interview-system-list"></div></div>
+        <div class="tab-content" id="tab-interview-hr"><div id="interview-hr-list"></div></div>
+      </div>
+
+      <!-- ══════════════ COMPARE ══════════════ -->
+      <div class="page" id="page-compare">
+        <div class="page-header"><h1>Career Comparison</h1><p>See how you stack up against industry benchmarks and role requirements</p></div>
+        <div class="grid-2" style="margin-bottom:20px">
+          <div class="card">
+            <div class="card-header"><div class="card-title"><i class="fa fa-users"></i>You vs. Industry Average</div></div>
+            <div class="chart-wrap"><canvas id="compareChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title"><i class="fa fa-target"></i>You vs. Job Requirements</div></div>
+            <div id="compare-bars-list"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><i class="fa fa-list-ol"></i>Skill-by-Skill Breakdown</div><div class="ai-badge">✨ AI Scored</div></div>
+          <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px" id="compare-table"></table></div>
+        </div>
+      </div>
+
+      <!-- ══════════════ PROGRESS TRACKER ══════════════ -->
+      <div class="page" id="page-progress">
+        <div class="page-header"><h1>Progress Tracker</h1><p>Track your growth week over week — data persists locally in your browser</p></div>
+        <div class="grid-2" style="margin-bottom:20px">
+          <div class="card">
+            <div class="card-header"><div class="card-title"><i class="fa fa-chart-line"></i>Score Trend</div></div>
+            <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:16px"><i class="fa fa-pen-to-square"></i>Log Today's Progress</div>
+            <div class="form-group"><label class="form-label">What did you learn or complete today?</label><textarea class="form-textarea" id="log-text" style="min-height:100px" placeholder="Completed Node.js auth tutorial, built JWT login endpoint…"></textarea></div>
+            <div class="grid-2">
+              <div class="form-group"><label class="form-label">Hours Studied</label><input class="form-input" id="log-hours" type="number" min="0" max="24" value="2"></div>
+              <div class="form-group"><label class="form-label">Mood / Energy (1–5)</label><input class="form-input" id="log-mood" type="number" min="1" max="5" value="4"></div>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="logProgress()"><i class="fa fa-floppy-disk"></i>Save Entry</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><i class="fa fa-clock-rotate-left"></i>Progress Log</div><button class="btn btn-danger btn-sm" onclick="clearLog()"><i class="fa fa-trash"></i>Clear</button></div>
+          <div id="progress-log-list"></div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- OVERLAY for mobile sidebar -->
+<div id="sidebar-overlay" onclick="closeSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:190"></div>
+
+<script>
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║                  AI SKILLGAP NAVIGATOR – CORE                   ║
+// ╚══════════════════════════════════════════════════════════════════╝
+
+// ─── STATE ─────────────────────────────────────────────────────────
+const STATE = {
+  currentPage: 'dashboard',
+  theme: 'dark',
+  profile: null,
+  skills: {},
+  score: 72,
+  gaps: [],
+  progressLog: [],
+  tasksDone: new Set(),
+  wizardStep: 1,
+  analyzed: false
+};
+
+// ─── DEMO DATA ──────────────────────────────────────────────────────
+const DEMO = {
+  name: 'Alex Johnson',
+  title: 'Frontend Developer',
+  target: 'Full Stack Developer',
+  skills: {
+    'React': 85, 'JavaScript': 80, 'TypeScript': 60, 'HTML/CSS': 90,
+    'Node.js': 45, 'SQL': 35, 'Docker': 40, 'AWS': 20,
+    'GraphQL': 15, 'Testing (Jest)': 30, 'System Design': 25, 'PostgreSQL': 30,
+    'Redux': 65, 'Git': 80, 'REST APIs': 70, 'Python': 20
+  },
+  gaps: [
+    {name:'GraphQL', yours:15, required:80, priority:'critical', category:'Backend'},
+    {name:'AWS / Cloud', yours:20, required:85, priority:'critical', category:'DevOps'},
+    {name:'System Design', yours:25, required:80, priority:'critical', category:'Architecture'},
+    {name:'Kubernetes', yours:0, required:70, priority:'critical', category:'DevOps'},
+    {name:'PostgreSQL Advanced', yours:30, required:75, priority:'critical', category:'Database'},
+    {name:'Node.js / Express', yours:45, required:85, priority:'moderate', category:'Backend'},
+    {name:'Testing (Jest/Cypress)', yours:30, required:75, priority:'moderate', category:'Quality'},
+    {name:'TypeScript Advanced', yours:60, required:90, priority:'moderate', category:'Frontend'},
+    {name:'Redis', yours:0, required:60, priority:'moderate', category:'Backend'},
+    {name:'Microservices', yours:20, required:65, priority:'moderate', category:'Architecture'},
+    {name:'CI/CD Pipelines', yours:40, required:70, priority:'minor', category:'DevOps'},
+    {name:'Python Scripting', yours:20, required:50, priority:'minor', category:'Scripting'},
+    {name:'SQL Optimization', yours:35, required:65, priority:'minor', category:'Database'},
+  ],
+  strengths: [
+    {name:'React', yours:85, required:80, category:'Frontend'},
+    {name:'JavaScript', yours:80, required:75, category:'Frontend'},
+    {name:'HTML/CSS', yours:90, required:70, category:'Frontend'},
+    {name:'Git / Version Control', yours:80, required:75, category:'Tools'},
+    {name:'REST APIs', yours:70, required:65, category:'Integration'},
+  ],
+  scoreBreakdown: [
+    {label:'Technical Skills', pct:68, color:'var(--accent)'},
+    {label:'Backend Knowledge', pct:42, color:'var(--red)'},
+    {label:'DevOps / Cloud', pct:30, color:'var(--yellow)'},
+    {label:'System Design', pct:35, color:'var(--orange,#f97316)'},
+    {label:'Frontend Mastery', pct:85, color:'var(--green)'},
+  ],
+  projects: [
+    {title:'Full-Stack Task Manager', diff:'medium', time:'2–3 weeks', tags:['React','Node.js','PostgreSQL','REST API'], desc:'Build a complete task management app with user auth, real-time updates, and a PostgreSQL backend. Covers Express, JWT, and basic DB design.',
+     skills:['Node.js','PostgreSQL','REST APIs','TypeScript'], github:'https://github.com'},
+    {title:'GraphQL Blog Platform', diff:'medium', time:'2 weeks', tags:['GraphQL','Apollo','React','Node.js'], desc:'Create a blogging platform using GraphQL subscriptions, Apollo Client/Server, and a PostgreSQL database. Perfect for learning GraphQL end-to-end.',
+     skills:['GraphQL','Node.js','PostgreSQL'], github:'https://github.com'},
+    {title:'AWS Serverless API', diff:'hard', time:'3 weeks', tags:['AWS Lambda','API Gateway','DynamoDB','S3'], desc:'Deploy a serverless REST API on AWS using Lambda, API Gateway, and DynamoDB. Covers IAM roles, S3 storage, and CloudWatch monitoring.',
+     skills:['AWS / Cloud','Serverless'], github:'https://github.com'},
+    {title:'Dockerized Microservice App', diff:'hard', time:'3–4 weeks', tags:['Docker','Kubernetes','Node.js','Redis'], desc:'Split a monolith into three microservices, containerize with Docker, orchestrate with Kubernetes (minikube), and add Redis caching.',
+     skills:['Docker','Kubernetes','Redis'], github:'https://github.com'},
+    {title:'Real-time Chat with Tests', diff:'medium', time:'1–2 weeks', tags:['WebSockets','Jest','Cypress','Node.js'], desc:'Build a WebSocket-powered chat app and achieve 80%+ test coverage with Jest unit tests and Cypress e2e tests. Great for CI/CD practice.',
+     skills:['Testing (Jest/Cypress)','CI/CD Pipelines'], github:'https://github.com'},
+    {title:'TypeScript Design Patterns', diff:'easy', time:'1 week', tags:['TypeScript','Design Patterns'], desc:'Implement 10 common design patterns in TypeScript with full type safety. Builds advanced TS skills and system thinking simultaneously.',
+     skills:['TypeScript Advanced'], github:'https://github.com'},
+  ],
+  roadmapWeeks: [
+    {week:'Week 1–2', title:'Node.js & Express Mastery', tasks:['Complete Node.js crash course (Traversy)','Build 3 REST endpoints with Express','Connect to PostgreSQL with Sequelize','Write middleware for auth & logging','Deploy to Heroku/Railway'],color:'var(--accent)'},
+    {week:'Week 3–4', title:'PostgreSQL & Database Design', tasks:['Learn relational modeling & normalization','Practice 20 SQL queries (joins, aggregates)','Add migrations to your project','Implement indexed queries','Learn transactions & ACID properties'],color:'var(--cyan)'},
+    {week:'Week 5–6', title:'GraphQL Deep Dive', tasks:['Apollo Server setup with your Node backend','Define schemas, resolvers, mutations','Connect React frontend with Apollo Client','Implement GraphQL subscriptions (WebSockets)','Auth with GraphQL directives'],color:'var(--purple)'},
+    {week:'Week 7–8', title:'AWS Cloud Fundamentals', tasks:['Create AWS free-tier account','Deploy EC2 instance with Node.js app','Set up S3 bucket for file storage','Try Lambda + API Gateway (serverless)','Configure CloudWatch logs & alarms'],color:'var(--yellow)'},
+    {week:'Week 9–10', title:'Docker & Kubernetes', tasks:['Write Dockerfiles for your projects','Docker Compose multi-service setup','Minikube local Kubernetes cluster','Deploy pods, services, ingress','Set up Helm charts'],color:'var(--red)'},
+    {week:'Week 11–12', title:'Testing & System Design', tasks:['Jest unit tests (80%+ coverage)','Cypress e2e tests for your app','Study system design: load balancers, CDN','Design a URL shortener & Twitter feed','Mock senior system design interviews'],color:'var(--green)'},
+  ],
+  actionPlan: [
+    {day:1,task:'Watch Node.js intro (2hrs) — Traversy Media YouTube',type:'learn'},
+    {day:2,task:'Code along: build Express CRUD API with 4 endpoints',type:'build'},
+    {day:3,task:'Install PostgreSQL locally, learn CREATE TABLE, INSERT, SELECT',type:'learn'},
+    {day:4,task:'Connect Express to PostgreSQL using pg or Sequelize ORM',type:'build'},
+    {day:5,task:'Rest day — review notes, bookmark resources',type:'rest'},
+    {day:6,task:'Build auth: bcrypt password hashing + JWT generation',type:'build'},
+    {day:7,task:'Read: "RESTful API Design Best Practices" article',type:'learn'},
+    {day:8,task:'Write 5 SQL JOIN queries on your own database',type:'practice'},
+    {day:9,task:'Set up GitHub Actions CI — run lint and tests on push',type:'devops'},
+    {day:10,task:'Watch GraphQL crash course (1.5hrs)',type:'learn'},
+    {day:11,task:'Scaffold Apollo Server, define first schema & resolver',type:'build'},
+    {day:12,task:'Connect React app to Apollo Client, run first query',type:'build'},
+    {day:13,task:'Rest day — push today\'s project to GitHub',type:'rest'},
+    {day:14,task:'Week 2 review: self-quiz on Node, SQL, GraphQL basics',type:'review'},
+    {day:15,task:'Create AWS free-tier account; explore console',type:'devops'},
+    {day:16,task:'Launch EC2 t2.micro, SSH in, deploy Node app',type:'devops'},
+    {day:17,task:'Set up S3 bucket, upload file from Node.js',type:'devops'},
+    {day:18,task:'Try AWS Lambda: write + deploy a hello-world function',type:'devops'},
+    {day:19,task:'Study Docker docs: images, containers, Dockerfile',type:'learn'},
+    {day:20,task:'Dockerize your Node+React project (multi-stage build)',type:'build'},
+    {day:21,task:'Rest day',type:'rest'},
+    {day:22,task:'Docker Compose: run Node + PostgreSQL + Redis together',type:'build'},
+    {day:23,task:'Read "System Design Interview" ch. 1–3',type:'learn'},
+    {day:24,task:'Design a URL shortener on paper — draw the architecture',type:'practice'},
+    {day:25,task:'Write 10 Jest unit tests for your API',type:'practice'},
+    {day:26,task:'Write 3 Cypress e2e tests for login + CRUD flow',type:'practice'},
+    {day:27,task:'Rest day — update your LinkedIn & resume',type:'rest'},
+    {day:28,task:'Mock technical interview with a friend or Pramp',type:'practice'},
+    {day:29,task:'Deploy full-stack project to VPS / Railway / Render',type:'build'},
+    {day:30,task:'Celebration: reassess score, update profile, plan next 30 days!',type:'review'},
+  ],
+  interviewQ: {
+    technical:[
+      {q:'Explain the difference between REST and GraphQL. When would you choose each?',a:'REST uses fixed endpoints returning full resource representations — simple, widely understood, great for CRUD. GraphQL exposes a single endpoint where clients ask for exactly the fields they need, reducing over-fetching. Choose GraphQL for complex, nested data models (social feeds, dashboards) and REST for simple resource-based APIs or when caching is critical (REST plays better with HTTP caches).'},
+      {q:'How does async/await work under the hood in JavaScript?',a:'Async/await is syntactic sugar over Promises, which are based on microtask queues. When you await a Promise, the function\'s execution suspends (without blocking the thread), a continuation is queued in the microtask queue, and control returns to the event loop. When the Promise resolves, the continuation resumes. Under the hood, Babel/V8 desugars async functions into generator-based state machines.'},
+      {q:'What is the N+1 problem in database queries, and how do you fix it?',a:'N+1 occurs when you query a list of N items and then query each item\'s related data individually — resulting in N+1 DB round trips. Fix with: (1) JOIN queries to fetch related data at once, (2) DataLoader pattern (batching in GraphQL), or (3) ORM eager-loading (Sequelize\'s include). Always check your ORM\'s generated SQL in development.'},
+      {q:'Explain Docker layers and why they matter for image size.',a:'Each Dockerfile instruction creates a read-only layer stacked on the previous one. Layers are cached individually — if a layer\'s instruction doesn\'t change, Docker reuses the cached layer on rebuild, speeding up CI/CD. Image size matters because smaller images pull faster, reduce attack surface, and lower registry storage costs. Best practices: use alpine base images, combine RUN commands with &&, and use multi-stage builds to discard build-time dependencies from the final image.'},
+      {q:'What are the SOLID principles? Give a React example for each.',a:'Single Responsibility: one component does one thing (a UserCard just displays user data, not fetches it). Open/Closed: extend components via props/composition rather than editing them. Liskov Substitution: any component substitutable with its variant (PrimaryButton, SecondaryButton both satisfy Button contract). Interface Segregation: keep prop interfaces minimal — don\'t force a component to accept props it ignores. Dependency Inversion: components depend on abstractions (a service interface) not concrete implementations (axios calls inside UI).'},
+    ],
+    behavioral:[
+      {q:'Tell me about a time you had to learn something new under a tight deadline.',a:'Use the STAR method: Situation (project needed GraphQL in 2 weeks), Task (I had zero GraphQL experience), Action (I blocked 2hrs/day, built a side project in parallel, asked a senior dev for 1 code review), Result (shipped on time with Apollo Client/Server integration, now I mentor others on it). Show adaptability and structured learning, not just "I Googled it."'},
+      {q:'Describe a conflict with a teammate and how you resolved it.',a:'Focus on process: "I noticed we had different approaches to API design. I asked for a 30-min alignment call instead of Slack back-and-forth. I shared my concerns with data (response time metrics) and asked for their reasoning. We agreed on a hybrid approach and documented the decision." Shows communication, not drama.'},
+      {q:'What\'s the most complex technical problem you\'ve solved?',a:'Pick something concrete: performance debugging, a data consistency bug, or a system design decision. Structure: what the problem was → how you diagnosed it (tools, logs, profiling) → the solution → the impact (40% faster, zero downtime). Avoid vague "I worked on a big project" answers.'},
+      {q:'Why are you transitioning from Frontend to Full Stack?',a:'Be honest and forward-looking: "I\'ve mastered the frontend layer but I want to own the full product experience — understand why an API is slow, design the data model, and ship features end-to-end without handoffs. I\'ve been building Node/PostgreSQL projects for 6 months to close that gap."'},
+    ],
+    system:[
+      {q:'Design a URL shortener like bit.ly.',a:'Requirements: shorten URL, redirect, analytics (clicks, geo). Core: hash the URL (MD5/Base62, 7 chars), store in DB (id, short, original, created_at, user_id). Redirect: cache popular URLs in Redis (LRU, 1M entries), fallback to DB. Scale: multiple app servers behind load balancer, read replicas, CDN for static. Analytics: async write to Kafka → consumer aggregates into ClickHouse. Bottleneck: redirect latency → cache hit rate is key.'},
+      {q:'How would you design a real-time notification system?',a:'Core components: producer (service that generates events) → message broker (Kafka/Redis pub-sub) → notification service → delivery channels (WebSocket for web, FCM for mobile, SMTP for email). WebSocket: maintain persistent connections per user-id, fan out events from Redis channel. Scale: sticky sessions or use Redis adapter for Socket.io across instances. Reliability: store notifications in DB, mark delivered, retry failed deliveries with exponential backoff.'},
+      {q:'Walk me through designing Twitter\'s feed for 100M users.',a:'Two approaches: push (fan-out on write: copy tweets to each follower\'s feed at post time — fast reads, expensive for celebrities with 10M followers) vs pull (fan-out on read: aggregate timelines on request — cheaper writes, slow reads). Solution: hybrid — fan-out for users with <10k followers, pull for celebrities. Cache timelines in Redis sorted sets (score = timestamp). Use CDN for media. Async processing via Kafka consumers.'},
+    ],
+    hr:[
+      {q:'Where do you see yourself in 3 years?',a:'Be specific to the role and company: "I want to grow into a senior full-stack engineer who owns a product area end-to-end — from database schema to user experience. In 3 years I\'d like to be leading technical decisions on a team, mentoring junior developers, and contributing to architecture decisions."'},
+      {q:'What\'s your salary expectation?',a:'Research market rates (levels.fyi, Glassdoor, LinkedIn Salary). Give a range anchored above your target: "Based on my research for senior full-stack roles in this market, I\'m targeting $X–$Y. I\'m open to discussing the full compensation package including equity and growth opportunities." Don\'t undersell, but don\'t be rigid.'},
+      {q:'Do you prefer working alone or in a team?',a:'Neither extreme is the right answer: "I do my best work in a collaborative team — I think out loud and enjoy code reviews, pairing sessions, and design discussions. At the same time, I need focused solo time to get deep work done. I\'ve found async-first teams with good documentation give me both."'},
+      {q:'Why do you want to work here specifically?',a:'Research the company genuinely: product, stack, culture, recent launches. Tie it to your goals: "I\'ve been following your product — the way you approach [specific feature] is smart. Your engineering blog post on [topic] showed me the team thinks deeply about [concern I care about]. And the transition to full-stack fits exactly the growth I\'m looking for."'},
+    ]
+  },
+  progressHistory: [
+    {date:'Week 1',score:58,hours:8,tasks:3},
+    {date:'Week 2',score:62,hours:12,tasks:6},
+    {date:'Week 3',score:65,hours:10,tasks:8},
+    {date:'Week 4',score:68,hours:14,tasks:12},
+    {date:'Week 5',score:70,hours:11,tasks:15},
+    {date:'Now',score:72,hours:9,tasks:18},
+  ]
+};
+
+// ─── INIT ────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadFromStorage();
+  initSkillsInput();
+  renderQuickSkills();
+  renderCharts();
+  renderGaps();
+  renderRoadmap();
+  renderActionPlan();
+  renderProjects();
+  renderInterview();
+  renderCompare();
+  renderProgress();
+  updateScoreRing(STATE.score);
+  updateTopbar('dashboard','Career Intelligence Overview');
+  STATE.analyzed = true;
+  checkWelcome();
+  setTimeout(()=>showToast('✨ Demo data loaded — customize your profile to generate a real plan!','info'),800);
+});
+
+function checkWelcome(){
+  const main=document.getElementById('dashboard-main');
+  const welcome=document.getElementById('dashboard-welcome');
+  if(STATE.analyzed){main.style.display='block';welcome.style.display='none';}
+  else{main.style.display='none';welcome.style.display='flex';}
+}
+
+// ─── STORAGE ─────────────────────────────────────────────────────────
+function saveToStorage(){
+  const data={profile:STATE.profile,skills:STATE.skills,score:STATE.score,tasksDone:[...STATE.tasksDone],progressLog:STATE.progressLog,theme:STATE.theme,analyzed:STATE.analyzed};
+  try{localStorage.setItem('sgn_state',JSON.stringify(data));}catch(e){}
+}
+function loadFromStorage(){
+  try{
+    const raw=localStorage.getItem('sgn_state');
+    if(raw){
+      const d=JSON.parse(raw);
+      if(d.profile)STATE.profile=d.profile;
+      if(d.skills&&Object.keys(d.skills).length)STATE.skills=d.skills;
+      if(d.score)STATE.score=d.score;
+      if(d.tasksDone)STATE.tasksDone=new Set(d.tasksDone);
+      if(d.progressLog)STATE.progressLog=d.progressLog;
+      if(d.theme&&d.theme!==STATE.theme){STATE.theme=d.theme;applyTheme();}
+      if(d.analyzed)STATE.analyzed=d.analyzed;
+    }
+  }catch(e){}
+  // If no skills, use demo
+  if(!STATE.skills||Object.keys(STATE.skills).length===0){STATE.skills=DEMO.skills;}
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────
+const PAGE_META={
+  dashboard:{title:'Dashboard',sub:'Career Intelligence Overview'},
+  profile:{title:'My Profile',sub:'Setup & Preferences'},
+  scanner:{title:'Resume Scanner',sub:'AI Skill Extraction'},
+  matcher:{title:'Job Matcher',sub:'JD Compatibility Analysis'},
+  gaps:{title:'Skill Gaps',sub:'Identified Weaknesses'},
+  roadmap:{title:'Learning Roadmap',sub:'Week-by-Week Curriculum'},
+  action:{title:'30-Day Action Plan',sub:'Daily Tasks & Goals'},
+  projects:{title:'Project Recommendations',sub:'Portfolio Builders'},
+  interview:{title:'Interview Prep',sub:'Questions & Model Answers'},
+  compare:{title:'Career Comparison',sub:'Benchmark Analysis'},
+  progress:{title:'Progress Tracker',sub:'Growth Over Time'},
+};
+function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const el=document.getElementById('page-'+page);
+  if(el)el.classList.add('active');
+  const nav=document.querySelector(`.nav-item[onclick="navigate('${page}')"]`);
+  if(nav)nav.classList.add('active');
+  const meta=PAGE_META[page]||{title:page,sub:''};
+  updateTopbar(meta.title,meta.sub);
+  STATE.currentPage=page;
+  if(window.innerWidth<860)closeSidebar();
+  window.scrollTo(0,0);
+}
+function updateTopbar(title,sub){
+  document.getElementById('topbar-title').textContent=title;
+  document.getElementById('topbar-subtitle').textContent=sub;
+}
+
+// ─── SIDEBAR ────────────────────────────────────────────────────────
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const ov=document.getElementById('sidebar-overlay');
+  if(window.innerWidth<860){
+    sb.classList.toggle('open');
+    ov.style.display=sb.classList.contains('open')?'block':'none';
+  }else{
+    sb.classList.toggle('collapsed');
+    document.getElementById('main').classList.toggle('expanded');
+  }
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').style.display='none';
+}
+
+// ─── THEME ───────────────────────────────────────────────────────────
+function toggleTheme(){
+  STATE.theme=STATE.theme==='dark'?'light':'dark';
+  applyTheme();
+  saveToStorage();
+}
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme',STATE.theme);
+  const icon=document.getElementById('theme-icon');
+  if(icon){icon.className=STATE.theme==='dark'?'fa fa-sun':'fa fa-moon';}
+  setTimeout(()=>{
+    Object.values(CHARTS).forEach(c=>{if(c&&c.update){try{updateChartTheme(c);}catch(e){}}});
+  },100);
+}
+function updateChartTheme(chart){
+  const isDark=STATE.theme==='dark';
+  const gridColor=isDark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)';
+  const textColor=isDark?'#9aa3b8':'#4a5470';
+  if(chart.options.scales){
+    Object.values(chart.options.scales).forEach(s=>{
+      if(s.grid)s.grid.color=gridColor;
+      if(s.ticks)s.ticks.color=textColor;
+    });
+  }
+  if(chart.options.plugins?.legend?.labels)chart.options.plugins.legend.labels.color=textColor;
+  chart.update('none');
+}
+
+// ─── CHARTS ─────────────────────────────────────────────────────────
+const CHARTS={};
+function chartDefaults(){
+  const isDark=STATE.theme==='dark';
+  return {
+    grid:isDark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)',
+    text:isDark?'#9aa3b8':'#4a5470',
+    bg:isDark?'#1f2637':'#edf0f7',
+  };
+}
+function renderCharts(){
+  const d=chartDefaults();
+  // Radar
+  const rCtx=document.getElementById('radarChart');
+  if(rCtx){
+    if(CHARTS.radar)CHARTS.radar.destroy();
+    const skills=Object.entries(STATE.skills).slice(0,8);
+    CHARTS.radar=new Chart(rCtx,{type:'radar',data:{
+      labels:skills.map(s=>s[0]),
+      datasets:[
+        {label:'Your Level',data:skills.map(s=>s[1]),backgroundColor:'rgba(79,142,247,.18)',borderColor:'#4f8ef7',borderWidth:2,pointBackgroundColor:'#4f8ef7'},
+        {label:'Required',data:skills.map(s=>Math.min(100,s[1]+20+Math.random()*20|0)),backgroundColor:'rgba(168,85,247,.1)',borderColor:'#a855f7',borderWidth:1.5,borderDash:[4,4],pointBackgroundColor:'#a855f7'}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:d.text,font:{size:11}}}},scales:{r:{angleLines:{color:d.grid},grid:{color:d.grid},ticks:{color:d.text,backdropColor:'transparent',font:{size:10}},pointLabels:{color:d.text,font:{size:11}}}}}});
+  }
+  // Gap bar
+  const gCtx=document.getElementById('gapBarChart');
+  if(gCtx){
+    if(CHARTS.gapBar)CHARTS.gapBar.destroy();
+    const categories=['Frontend','Backend','DevOps','Database','Architecture'];
+    const scores=[82,38,28,32,25];
+    const required=[75,80,70,75,75];
+    CHARTS.gapBar=new Chart(gCtx,{type:'bar',data:{
+      labels:categories,
+      datasets:[
+        {label:'You',data:scores,backgroundColor:'rgba(79,142,247,.8)',borderRadius:6,borderSkipped:false},
+        {label:'Required',data:required,backgroundColor:'rgba(168,85,247,.5)',borderRadius:6,borderSkipped:false}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:d.text,font:{size:11}}}},scales:{x:{grid:{color:d.grid},ticks:{color:d.text}},y:{grid:{color:d.grid},ticks:{color:d.text},min:0,max:100}}}});
+  }
+  // Progress line
+  const pCtx=document.getElementById('progressChart');
+  if(pCtx){
+    if(CHARTS.progress)CHARTS.progress.destroy();
+    CHARTS.progress=new Chart(pCtx,{type:'line',data:{
+      labels:DEMO.progressHistory.map(p=>p.date),
+      datasets:[{label:'Readiness Score',data:DEMO.progressHistory.map(p=>p.score),borderColor:'#4f8ef7',backgroundColor:'rgba(79,142,247,.12)',fill:true,tension:.4,pointBackgroundColor:'#4f8ef7',pointRadius:4}]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:d.text}}},scales:{x:{grid:{color:d.grid},ticks:{color:d.text}},y:{grid:{color:d.grid},ticks:{color:d.text},min:50,max:100}}}});
+  }
+  // Compare chart
+  const cCtx=document.getElementById('compareChart');
+  if(cCtx){
+    if(CHARTS.compare)CHARTS.compare.destroy();
+    CHARTS.compare=new Chart(cCtx,{type:'bar',data:{
+      labels:['React','Node.js','SQL','AWS','Testing','TypeScript'],
+      datasets:[
+        {label:'You',data:[85,45,35,20,30,60],backgroundColor:'rgba(79,142,247,.8)',borderRadius:6},
+        {label:'Avg Candidate',data:[72,65,60,45,55,70],backgroundColor:'rgba(245,158,11,.6)',borderRadius:6},
+        {label:'Senior Required',data:[80,85,75,85,75,90],backgroundColor:'rgba(239,68,68,.5)',borderRadius:6}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:d.text,font:{size:11}}}},scales:{x:{grid:{color:d.grid},ticks:{color:d.text}},y:{grid:{color:d.grid},ticks:{color:d.text},min:0,max:100}}}});
+  }
+  // Roadmap gantt approximation (stacked bar)
+  const ggCtx=document.getElementById('roadmapGantt');
+  if(ggCtx){
+    if(CHARTS.gantt)CHARTS.gantt.destroy();
+    CHARTS.gantt=new Chart(ggCtx,{type:'bar',data:{
+      labels:DEMO.roadmapWeeks.map(w=>w.week),
+      datasets:[{label:'Effort (hrs)',data:[20,18,22,20,25,18],backgroundColor:DEMO.roadmapWeeks.map(w=>w.color),borderRadius:6}]
+    },options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:d.grid},ticks:{color:d.text}},y:{grid:{color:d.grid},ticks:{color:d.text}}}}});
+  }
+  // Trend
+  const tCtx=document.getElementById('trendChart');
+  if(tCtx){
+    if(CHARTS.trend)CHARTS.trend.destroy();
+    const log=STATE.progressLog.length>0?STATE.progressLog:DEMO.progressHistory.map(p=>({date:p.date,score:p.score}));
+    CHARTS.trend=new Chart(tCtx,{type:'line',data:{
+      labels:log.map(l=>l.date||new Date(l.timestamp).toLocaleDateString()),
+      datasets:[{label:'Score',data:log.map(l=>l.score||STATE.score),borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,.12)',fill:true,tension:.4,pointBackgroundColor:'#22c55e',pointRadius:4}]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:d.text}}},scales:{x:{grid:{color:d.grid},ticks:{color:d.text}},y:{grid:{color:d.grid},ticks:{color:d.text},min:0,max:100}}}});
+  }
+}
+
+// ─── SCORE RING ──────────────────────────────────────────────────────
+function updateScoreRing(score){
+  const circumference=427;
+  const offset=circumference-(circumference*score/100);
+  const fill=document.getElementById('score-ring-fill');
+  if(fill)fill.style.strokeDashoffset=offset;
+  const el=document.getElementById('score-center-val');
+  if(el)el.textContent=score;
+  const topEl=document.getElementById('topbar-score-val');
+  if(topEl)topEl.textContent=score;
+  const statEl=document.getElementById('stat-score');
+  if(statEl)statEl.textContent=score;
+  const gradeTag=document.getElementById('score-grade-tag');
+  if(gradeTag){
+    let grade,cls;
+    if(score>=85){grade='Excellent';cls='tag-green';}
+    else if(score>=70){grade='Good';cls='tag-accent';}
+    else if(score>=55){grade='Fair';cls='tag-yellow';}
+    else{grade='Needs Work';cls='tag-red';}
+    gradeTag.className='tag '+cls;
+    gradeTag.textContent=grade;
+  }
+  // Score breakdown
+  const bd=document.getElementById('score-breakdown');
+  if(bd){
+    bd.innerHTML=DEMO.scoreBreakdown.map(s=>`
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>${s.label}</span><span style="font-weight:600">${s.pct}%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${s.pct}%;background:${s.color}"></div></div>
+      </div>`).join('');
+  }
+}
+
+// ─── GAPS ────────────────────────────────────────────────────────────
+function renderGaps(){
+  // Top gaps on dashboard
+  const topEl=document.getElementById('top-gaps-list');
+  if(topEl){
+    topEl.innerHTML=DEMO.gaps.slice(0,5).map(g=>`
+      <div class="skill-row">
+        <span class="skill-name">${g.name}</span>
+        <div class="skill-bar-wrap"><div class="progress-bar"><div class="progress-fill" style="width:${g.yours}%;background:${g.priority==='critical'?'var(--red)':g.priority==='moderate'?'var(--yellow)':'var(--green)'}"></div></div></div>
+        <span class="skill-level">${g.yours}%</span>
+        <span class="skill-gap-indicator gap-${g.priority}">${g.priority}</span>
+      </div>`).join('');
+  }
+  // Update badge
+  const badge=document.getElementById('gaps-badge');
+  if(badge)badge.textContent=DEMO.gaps.filter(g=>g.priority==='critical').length;
+  const statEl=document.getElementById('stat-gaps');
+  if(statEl)statEl.textContent=DEMO.gaps.filter(g=>g.priority==='critical').length;
+  const matched=document.getElementById('stat-matched');
+  if(matched)matched.textContent=DEMO.strengths.length+9;
+  // Gap tabs
+  renderGapList('gaps-critical-list', DEMO.gaps.filter(g=>g.priority==='critical'));
+  renderGapList('gaps-moderate-list', DEMO.gaps.filter(g=>g.priority==='moderate'));
+  renderGapList('gaps-minor-list', DEMO.gaps.filter(g=>g.priority==='minor'));
+  // Strengths
+  const sEl=document.getElementById('gaps-strengths-list');
+  if(sEl){
+    sEl.innerHTML=DEMO.strengths.map(s=>`
+      <div class="card card-sm" style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="font-size:14px;font-weight:600">${s.name} <span class="tag tag-green" style="margin-left:8px">✓ Above Requirement</span></div>
+          <div style="display:flex;gap:8px;font-size:12px;color:var(--text2)"><span>You: <b style="color:var(--green)">${s.yours}%</b></span><span>Required: ${s.required}%</span></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${s.yours}%;background:var(--green)"></div></div>
+      </div>`).join('');
+  }
+}
+function renderGapList(elId, gaps){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  if(gaps.length===0){el.innerHTML='<div class="empty-state"><i class="fa fa-check-circle" style="color:var(--green)"></i><p>No gaps in this category — great work!</p></div>';return;}
+  el.innerHTML=gaps.map(g=>`
+    <div class="card card-sm" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:14px;font-weight:600">${g.name}</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span class="tag">${g.category}</span>
+          <span class="skill-gap-indicator gap-${g.priority}">${g.priority}</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;font-size:12px;color:var(--text2);margin-bottom:8px">
+        <span>Your level: <b style="color:var(--text)">${g.yours}%</b></span>
+        <span>Required: <b style="color:var(--text)">${g.required}%</b></span>
+        <span>Gap: <b style="color:var(--red)">${g.required-g.yours}%</b></span>
+      </div>
+      <div style="position:relative;height:8px;background:var(--bg4);border-radius:20px;overflow:hidden;margin-bottom:10px">
+        <div style="height:100%;width:${g.required}%;background:rgba(239,68,68,.3);border-radius:20px;position:absolute"></div>
+        <div style="height:100%;width:${g.yours}%;background:${g.priority==='critical'?'var(--red)':g.priority==='moderate'?'var(--yellow)':'var(--green)'};border-radius:20px;position:absolute;transition:width .6s"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(g.name+' tutorial')}" target="_blank" class="btn btn-secondary btn-sm"><i class="fa fa-play"></i>Watch Tutorial</a>
+        <a href="https://www.google.com/search?q=${encodeURIComponent(g.name+' best course 2024')}" target="_blank" class="btn btn-secondary btn-sm"><i class="fa fa-book"></i>Find Course</a>
+        <button class="btn btn-success btn-sm" onclick="markSkillLearned('${g.name}')"><i class="fa fa-check"></i>Mark Improved</button>
+      </div>
+    </div>`).join('');
+}
+function markSkillLearned(name){
+  showToast(`Great! "${name}" marked as improved. Keep going! 🎉`,'success');
+  STATE.score=Math.min(100,STATE.score+2);
+  updateScoreRing(STATE.score);
+  saveToStorage();
+}
+
+// ─── SKILLS INPUT ────────────────────────────────────────────────────
+const QUICK_SKILLS=['React','Vue.js','Angular','Node.js','Python','TypeScript','SQL','MongoDB','Docker','AWS','GraphQL','Redis','Kubernetes','Next.js','PostgreSQL','Jest','Git','REST APIs','Golang','Java'];
+function renderQuickSkills(){
+  const el=document.getElementById('quick-skills');
+  if(!el)return;
+  el.innerHTML=QUICK_SKILLS.map(s=>`<span class="tag" style="cursor:pointer" onclick="quickAddSkill('${s}')">${s} <i class="fa fa-plus" style="font-size:9px"></i></span>`).join('');
+}
+function initSkillsInput(){
+  // Pre-fill chips from skills
+  renderSkillChips();
+  renderSkillSliders();
+}
+function renderSkillChips(){
+  const el=document.getElementById('skill-chips');
+  if(!el)return;
+  el.innerHTML=Object.keys(STATE.skills).map(s=>`<span class="skill-chip">${s}<button onclick="removeSkill('${s}')">×</button></span>`).join('');
+}
+function renderSkillSliders(){
+  const el=document.getElementById('skill-sliders');
+  if(!el)return;
+  if(Object.keys(STATE.skills).length===0){el.innerHTML='<p style="color:var(--text3);font-size:13px">Add skills above, then rate your proficiency here.</p>';return;}
+  el.innerHTML=`<div class="card-title" style="margin-bottom:14px;font-size:13px">Rate Your Proficiency</div>`+
+    Object.entries(STATE.skills).map(([name,val])=>`
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <span style="font-size:13px;width:140px;flex-shrink:0">${name}</span>
+        <input type="range" min="0" max="100" value="${val}" oninput="updateSkillLevel('${name}',this.value,this.nextElementSibling)" style="flex:1;accent-color:var(--accent)">
+        <span style="font-size:12px;color:var(--text2);width:32px;text-align:right">${val}%</span>
+      </div>`).join('');
+}
+function addSkill(){
+  const input=document.getElementById('new-skill-input');
+  const name=input.value.trim();
+  if(!name)return;
+  STATE.skills[name]=50;
+  input.value='';
+  renderSkillChips();
+  renderSkillSliders();
+}
+function quickAddSkill(name){
+  if(STATE.skills[name])return;
+  STATE.skills[name]=50;
+  renderSkillChips();
+  renderSkillSliders();
+  showToast(`"${name}" added — rate your proficiency in the sliders!`,'success');
+}
+function removeSkill(name){
+  delete STATE.skills[name];
+  renderSkillChips();
+  renderSkillSliders();
+}
+function updateSkillLevel(name,val,display){
+  STATE.skills[name]=parseInt(val);
+  if(display)display.textContent=val+'%';
+}
+
+// ─── WIZARD ─────────────────────────────────────────────────────────
+function wizardNext(current){
+  if(current<4){
+    document.getElementById(`wpane-${current}`).classList.remove('active');
+    document.getElementById(`wpane-${current+1}`).classList.add('active');
+    document.getElementById(`wdot-${current}`).querySelector('.w-dot').className='w-dot done';
+    document.getElementById(`wdot-${current}`).classList.remove('active');
+    document.getElementById(`wdot-${current}`).classList.add('done');
+    document.getElementById(`wdot-${current+1}`).querySelector('.w-dot').className='w-dot active';
+    document.getElementById(`wdot-${current+1}`).classList.add('active');
+    STATE.wizardStep=current+1;
+  }
+}
+function wizardBack(current){
+  if(current>1){
+    document.getElementById(`wpane-${current}`).classList.remove('active');
+    document.getElementById(`wpane-${current-1}`).classList.add('active');
+    document.getElementById(`wdot-${current}`).querySelector('.w-dot').className='w-dot';
+    document.getElementById(`wdot-${current}`).classList.remove('active');
+    document.getElementById(`wdot-${current-1}`).querySelector('.w-dot').className='w-dot active';
+    STATE.wizardStep=current-1;
+  }
+}
+
+// ─── SAVE PROFILE ────────────────────────────────────────────────────
+function saveProfileAndAnalyze(){
+  STATE.profile={
+    name:document.getElementById('p-name').value||'User',
+    email:document.getElementById('p-email').value,
+    title:document.getElementById('p-title').value,
+    exp:document.getElementById('p-exp').value,
+    edu:document.getElementById('p-edu').value,
+    target:document.getElementById('p-target').value,
+    company:document.getElementById('p-company').value,
+    timeline:document.getElementById('p-timeline').value,
+    hours:document.getElementById('p-hours').value,
+  };
+  // Update UI
+  const n=STATE.profile.name;
+  const initials=n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('user-avatar-sidebar').textContent=initials;
+  document.getElementById('user-name-sidebar').textContent=n;
+  document.getElementById('user-role-sidebar').textContent=`${STATE.profile.title} → ${STATE.profile.target}`;
+  STATE.analyzed=true;
+  saveToStorage();
+  showToast('🤖 Profile saved! Generating your personalized analysis…','success');
+  setTimeout(()=>{
+    navigate('dashboard');
+    updateScoreRing(STATE.score);
+    checkWelcome();
+    renderCharts();
+    showToast('✅ Analysis complete! Your roadmap is ready.','success');
+  },1200);
+}
+
+// ─── RESUME SCANNER ──────────────────────────────────────────────────
+function scanResume(){
+  const text=document.getElementById('resume-text').value;
+  if(!text.trim()){showToast('Please paste your resume text first','warning');return;}
+  const out=document.getElementById('scan-output');
+  out.innerHTML='<div style="text-align:center;padding:40px"><div class="loading-spinner"></div><p style="margin-top:12px;font-size:13px;color:var(--text2)">AI is analyzing your resume…</p></div>';
+  setTimeout(()=>{
+    // AI simulation: extract keywords from text
+    const found=[];
+    const techSkills=['React','Vue','Angular','Node.js','Python','TypeScript','JavaScript','SQL','MongoDB','Docker','AWS','GraphQL','Redis','PostgreSQL','Jest','Git','REST API','Kubernetes','Express','Flask','Django','Java','Go','C++','PHP','Laravel','Ruby','Rails','Swift','Kotlin','Firebase','Webpack','Vite','Tailwind','Bootstrap','CSS','HTML','Figma','Photoshop','Sketch'];
+    techSkills.forEach(s=>{if(text.toLowerCase().includes(s.toLowerCase()))found.push(s);});
+    const score=Math.min(95,50+found.length*3);
+    document.getElementById('scan-score-badge').textContent=`Match: ${score}%`;
+    document.getElementById('scan-score-badge').className=`tag ${score>=70?'tag-green':score>=50?'tag-yellow':'tag-red'}`;
+    document.getElementById('scan-score-badge').style.display='inline-flex';
+    out.innerHTML=`
+      <div class="alert alert-success"><i class="fa fa-circle-check"></i><div>Resume scanned successfully — <b>${found.length} skills</b> extracted</div></div>
+      <div style="margin-bottom:16px">
+        <div class="card-title" style="font-size:12px;margin-bottom:8px">EXTRACTED SKILLS</div>
+        <div class="tags-wrap">${found.map(s=>`<span class="tag tag-accent">${s}</span>`).join('')}</div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div class="card-title" style="font-size:12px;margin-bottom:8px">MISSING (vs target role)</div>
+        <div class="tags-wrap">${['GraphQL','Kubernetes','Redis','PostgreSQL','System Design'].map(s=>`<span class="tag tag-red">${s}</span>`).join('')}</div>
+      </div>
+      <div class="alert alert-warning"><i class="fa fa-lightbulb"></i><div><b>Tip:</b> Add specific metrics to your experience section (e.g. "reduced load time by 40%") — quantified impact increases interview callbacks by 2×.</div></div>
+      <button class="btn btn-primary btn-block" onclick="navigate('gaps')"><i class="fa fa-triangle-exclamation"></i>View Full Gap Analysis</button>`;
+    // Update skills state
+    found.forEach(s=>{if(!STATE.skills[s])STATE.skills[s]=60;});
+    saveToStorage();
+    showToast(`✅ Resume scanned — ${found.length} skills found!`,'success');
+  },1800);
+}
+
+// ─── JOB MATCHER ─────────────────────────────────────────────────────
+function matchJob(){
+  const text=document.getElementById('jd-text').value;
+  if(!text.trim()){showToast('Please paste a job description first','warning');return;}
+  const out=document.getElementById('match-output');
+  out.innerHTML='<div style="text-align:center;padding:40px"><div class="loading-spinner"></div><p style="margin-top:12px;font-size:13px;color:var(--text2)">Comparing against your profile…</p></div>';
+  setTimeout(()=>{
+    const required=['React','TypeScript','Node.js','PostgreSQL','Redis','AWS','GraphQL','Docker','Kubernetes','Testing','System Design','Microservices'];
+    const have=required.filter(s=>Object.keys(STATE.skills).some(k=>k.toLowerCase().includes(s.toLowerCase())));
+    const missing=required.filter(s=>!Object.keys(STATE.skills).some(k=>k.toLowerCase().includes(s.toLowerCase())));
+    const pct=Math.round((have.length/required.length)*100);
+    out.innerHTML=`
+      <div class="match-meter" style="margin-bottom:16px">
+        <div class="match-pct">${pct}%</div>
+        <div class="match-label">Overall Match Score</div>
+        <div style="margin-top:12px"><div class="progress-bar" style="height:10px"><div class="progress-fill" style="width:${pct}%;background:${pct>=70?'var(--green)':pct>=50?'var(--yellow)':'var(--red)'}"></div></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div>
+          <div class="card-title" style="font-size:11px;color:var(--green);margin-bottom:6px">✅ YOU HAVE (${have.length})</div>
+          <div class="tags-wrap">${have.map(s=>`<span class="tag tag-green">${s}</span>`).join('')}</div>
+        </div>
+        <div>
+          <div class="card-title" style="font-size:11px;color:var(--red);margin-bottom:6px">❌ MISSING (${missing.length})</div>
+          <div class="tags-wrap">${missing.map(s=>`<span class="tag tag-red">${s}</span>`).join('')}</div>
+        </div>
+      </div>
+      <div class="alert ${pct>=70?'alert-success':pct>=50?'alert-warning':'alert-danger'}">
+        <i class="fa fa-${pct>=70?'check-circle':pct>=50?'clock':'times-circle'}"></i>
+        <div><b>${pct>=70?'Strong Match':'Partial Match'}</b> — ${pct>=70?'You meet most requirements. Focus on closing the remaining gaps before applying.':'You need to close '+missing.length+' skill gaps. Your roadmap below shows how to do it in 12 weeks.'}</div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="navigate('roadmap')"><i class="fa fa-route"></i>View Learning Roadmap</button>`;
+    showToast(`Job match: ${pct}% — ${have.length}/${required.length} skills matched`,'info');
+  },1500);
+}
+
+// ─── ROADMAP ─────────────────────────────────────────────────────────
+function renderRoadmap(){
+  // Milestones
+  const mEl=document.getElementById('milestones-list');
+  if(mEl){
+    const milestones=[
+      {title:'Backend Foundation',desc:'Complete Node.js + PostgreSQL module',status:'current',week:'Week 1–2'},
+      {title:'GraphQL Proficient',desc:'Build first production GraphQL API',status:'pending',week:'Week 5–6'},
+      {title:'Cloud Certified',desc:'AWS Solutions Architect or Cloud Practitioner',status:'pending',week:'Week 7–8'},
+      {title:'Portfolio Ready',desc:'3 full-stack projects on GitHub',status:'pending',week:'Week 10'},
+      {title:'Interview-Ready',desc:'Pass 3 mock system design interviews',status:'pending',week:'Week 12'},
+    ];
+    mEl.innerHTML='<div class="timeline">'+milestones.map(m=>`
+      <div class="timeline-item">
+        <div class="timeline-dot ${m.status}"></div>
+        <div class="timeline-content">
+          <div class="timeline-title">${m.title}</div>
+          <div class="timeline-meta">${m.week}</div>
+          <div style="font-size:12px;color:var(--text2)">${m.desc}</div>
+        </div>
+      </div>`).join('')+'</div>';
+  }
+  // Weeks
+  const wEl=document.getElementById('roadmap-weeks');
+  if(!wEl)return;
+  wEl.innerHTML=DEMO.roadmapWeeks.map((w,i)=>`
+    <div class="roadmap-week">
+      <div class="week-header" onclick="toggleWeek(${i})">
+        <span class="week-num">${w.week}</span>
+        <span class="week-title">${w.title}</span>
+        <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
+          <span class="tag" style="background:${w.color}22;color:${w.color};border-color:${w.color}44;font-size:10px">${w.tasks.length} tasks</span>
+          <i class="fa fa-chevron-down week-toggle" id="wtog-${i}"></i>
+        </div>
+      </div>
+      <div class="week-body" id="week-body-${i}">
+        ${w.tasks.map((t,j)=>`
+          <div class="task-item">
+            <div class="task-check" id="rtask-${i}-${j}" onclick="toggleRTask(${i},${j})"></div>
+            <div class="task-text">${t}</div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+function toggleWeek(i){
+  const body=document.getElementById(`week-body-${i}`);
+  const tog=document.getElementById(`wtog-${i}`);
+  body.classList.toggle('open');
+  tog.style.transform=body.classList.contains('open')?'rotate(180deg)':'rotate(0deg)';
+}
+function toggleRTask(i,j){
+  const el=document.getElementById(`rtask-${i}-${j}`);
+  el.classList.toggle('checked');
+  el.innerHTML=el.classList.contains('checked')?'<i class="fa fa-check" style="font-size:9px"></i>':'';
+}
+
+// ─── ACTION PLAN ──────────────────────────────────────────────────────
+function renderActionPlan(){
+  const el=document.getElementById('action-plan-list');
+  if(!el)return;
+  const typeColors={'learn':'var(--accent)','build':'var(--green)','practice':'var(--purple)','devops':'var(--cyan)','review':'var(--yellow)','rest':'var(--text3)'};
+  const typeIcons={'learn':'book','build':'code','practice':'dumbbell','devops':'server','review':'rotate-left','rest':'mug-hot'};
+  el.innerHTML=DEMO.actionPlan.map(t=>`
+    <div class="task-item" id="task-wrap-${t.day}">
+      <div class="task-check ${STATE.tasksDone.has(t.day)?'checked':''}" id="task-${t.day}" onclick="toggleTask(${t.day})">
+        ${STATE.tasksDone.has(t.day)?'<i class="fa fa-check" style="font-size:9px"></i>':''}
+      </div>
+      <div class="task-text" style="${STATE.tasksDone.has(t.day)?'text-decoration:line-through;color:var(--text3)':''}">
+        <b style="color:var(--text3);font-size:11px">Day ${t.day} ·</b> ${t.task}
+      </div>
+      <span class="task-tag" style="background:${typeColors[t.type]}22;color:${typeColors[t.type]}">
+        <i class="fa fa-${typeIcons[t.type]}"></i> ${t.type}
+      </span>
+    </div>`).join('');
+  updatePlanStats();
+}
+function toggleTask(day){
+  if(STATE.tasksDone.has(day))STATE.tasksDone.delete(day);
+  else{STATE.tasksDone.add(day);showToast(`Day ${day} task complete! 🎉`,'success');}
+  const el=document.getElementById(`task-${day}`);
+  const wrap=document.getElementById(`task-wrap-${day}`);
+  if(el){el.classList.toggle('checked',STATE.tasksDone.has(day));el.innerHTML=STATE.tasksDone.has(day)?'<i class="fa fa-check" style="font-size:9px"></i>':'';}
+  if(wrap){const txt=wrap.querySelector('.task-text');if(txt)txt.style=STATE.tasksDone.has(day)?'text-decoration:line-through;color:var(--text3)':'';}
+  updatePlanStats();
+  saveToStorage();
+}
+function updatePlanStats(){
+  const done=STATE.tasksDone.size;
+  const total=DEMO.actionPlan.length;
+  const pct=Math.round((done/total)*100);
+  const doneEl=document.getElementById('tasks-done-count');
+  const pctEl=document.getElementById('tasks-pct');
+  const barEl=document.getElementById('plan-progress-bar');
+  if(doneEl)doneEl.textContent=done;
+  if(pctEl)pctEl.textContent=pct+'%';
+  if(barEl)barEl.style.width=pct+'%';
+  // Update score based on tasks
+  const bonus=Math.round(done*0.8);
+  STATE.score=Math.min(100,64+bonus);
+  updateScoreRing(STATE.score);
+}
+function resetTasks(){STATE.tasksDone.clear();renderActionPlan();saveToStorage();showToast('Task list reset','info');}
+
+// ─── PROJECTS ────────────────────────────────────────────────────────
+function renderProjects(){
+  const el=document.getElementById('projects-grid');
+  if(!el)return;
+  el.innerHTML=DEMO.projects.map(p=>`
+    <div class="project-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:4px">${p.title}</div>
+          <span class="project-diff diff-${p.diff}">${p.diff}</span>
+          <span class="tag" style="margin-left:6px;font-size:10px"><i class="fa fa-clock"></i> ${p.time}</span>
+        </div>
+      </div>
+      <p style="font-size:12.5px;color:var(--text2);line-height:1.6;margin-bottom:12px">${p.desc}</p>
+      <div class="tags-wrap" style="margin-bottom:12px">${p.tags.map(t=>`<span class="tag tag-accent" style="font-size:10px">${t}</span>`).join('')}</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px"><i class="fa fa-check-circle" style="color:var(--green)"></i> Targets: ${p.skills.join(', ')}</div>
+      <div style="display:flex;gap:8px">
+        <a href="${p.github}" target="_blank" class="btn btn-secondary btn-sm" style="flex:1"><i class="fa fa-code-branch"></i>Start Project</a>
+        <button class="btn btn-success btn-sm" onclick="markProjectDone('${p.title}')"><i class="fa fa-check"></i>Done</button>
+      </div>
+    </div>`).join('');
+}
+function markProjectDone(title){showToast(`🎉 Project "${title.substring(0,20)}…" marked complete! Score updated.`,'success');STATE.score=Math.min(100,STATE.score+3);updateScoreRing(STATE.score);saveToStorage();}
+
+// ─── INTERVIEW ───────────────────────────────────────────────────────
+function renderInterview(){
+  ['technical','behavioral','system','hr'].forEach(type=>{
+    const el=document.getElementById(`interview-${type}-list`);
+    if(!el)return;
+    const qs=DEMO.interviewQ[type]||[];
+    el.innerHTML=qs.map((q,i)=>`
+      <div class="question-card">
+        <div class="q-header">
+          <div class="q-num">${i+1}</div>
+          <div class="q-text">${q.q}</div>
+          <span class="q-toggle" onclick="toggleAnswer(this)">Show Answer ▼</span>
+        </div>
+        <div class="q-answer">${q.a}</div>
+      </div>`).join('');
+  });
+}
+function toggleAnswer(btn){
+  const ans=btn.closest('.question-card').querySelector('.q-answer');
+  const open=ans.classList.toggle('visible');
+  btn.textContent=open?'Hide ▲':'Show Answer ▼';
+}
+
+// ─── COMPARE ─────────────────────────────────────────────────────────
+function renderCompare(){
+  const barsEl=document.getElementById('compare-bars-list');
+  if(barsEl){
+    const skills=[
+      {name:'React / Frontend',yours:85,req:80},
+      {name:'Node.js / Backend',yours:45,req:85},
+      {name:'Database (SQL)',yours:35,req:75},
+      {name:'Cloud / AWS',yours:20,req:85},
+      {name:'Testing',yours:30,req:75},
+      {name:'System Design',yours:25,req:80},
+    ];
+    barsEl.innerHTML=skills.map(s=>`
+      <div class="compare-bar-wrap">
+        <div class="compare-bar-labels">
+          <span style="font-size:12px;font-weight:500">${s.name}</span>
+          <span style="font-size:11px;color:var(--text3)">You: <b style="color:var(--accent)">${s.yours}%</b> · Required: ${s.req}%</span>
+        </div>
+        <div style="position:relative;height:8px;background:var(--bg4);border-radius:20px;overflow:hidden">
+          <div style="position:absolute;height:100%;width:${s.req}%;background:rgba(168,85,247,.25);border-radius:20px"></div>
+          <div style="position:absolute;height:100%;width:${s.yours}%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:20px"></div>
+        </div>
+      </div>`).join('');
+  }
+  // Table
+  const tableEl=document.getElementById('compare-table');
+  if(tableEl){
+    const rows=[
+      {skill:'React',yours:85,avg:72,senior:80,status:'above'},
+      {skill:'TypeScript',yours:60,avg:65,senior:90,status:'below'},
+      {skill:'Node.js',yours:45,avg:65,senior:85,status:'below'},
+      {skill:'PostgreSQL',yours:30,avg:60,senior:75,status:'below'},
+      {skill:'AWS',yours:20,avg:45,senior:85,status:'below'},
+      {skill:'GraphQL',yours:15,avg:40,senior:80,status:'below'},
+      {skill:'Testing',yours:30,avg:55,senior:75,status:'below'},
+      {skill:'Docker',yours:40,avg:60,senior:70,status:'below'},
+      {skill:'System Design',yours:25,avg:50,senior:80,status:'below'},
+      {skill:'Git / VCS',yours:80,avg:75,senior:80,status:'above'},
+    ];
+    const headerStyle='padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);background:var(--bg3)';
+    const cellStyle='padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border)';
+    tableEl.innerHTML=`<thead><tr>
+      <th style="${headerStyle}">Skill</th>
+      <th style="${headerStyle}">Your Level</th>
+      <th style="${headerStyle}">Avg Candidate</th>
+      <th style="${headerStyle}">Senior Required</th>
+      <th style="${headerStyle}">Status</th>
+    </tr></thead><tbody>${rows.map(r=>`<tr>
+      <td style="${cellStyle};font-weight:600">${r.skill}</td>
+      <td style="${cellStyle}"><span style="font-weight:700;color:var(--accent)">${r.yours}%</span></td>
+      <td style="${cellStyle};color:var(--text2)">${r.avg}%</td>
+      <td style="${cellStyle};color:var(--text2)">${r.senior}%</td>
+      <td style="${cellStyle}"><span class="tag ${r.status==='above'?'tag-green':'tag-red'}">${r.status==='above'?'✓ Above':'↓ Gap'}</span></td>
+    </tr>`).join('')}</tbody>`;
+  }
+}
+
+// ─── PROGRESS ────────────────────────────────────────────────────────
+function renderProgress(){
+  renderProgressLog();
+  renderCharts();
+}
+function logProgress(){
+  const text=document.getElementById('log-text').value.trim();
+  const hours=parseFloat(document.getElementById('log-hours').value)||0;
+  const mood=parseInt(document.getElementById('log-mood').value)||3;
+  if(!text){showToast('Please write what you learned today','warning');return;}
+  const entry={id:Date.now(),text,hours,mood,score:STATE.score,timestamp:new Date().toISOString(),date:new Date().toLocaleDateString()};
+  STATE.progressLog.unshift(entry);
+  STATE.score=Math.min(100,STATE.score+1);
+  updateScoreRing(STATE.score);
+  document.getElementById('log-text').value='';
+  renderProgressLog();
+  saveToStorage();
+  showToast('Progress logged! 📈 Keep it up!','success');
+}
+function renderProgressLog(){
+  const el=document.getElementById('progress-log-list');
+  if(!el)return;
+  if(STATE.progressLog.length===0){
+    el.innerHTML='<div class="empty-state"><i class="fa fa-clock-rotate-left"></i><p>No entries yet — log your first progress above!</p></div>';return;
+  }
+  const moodEmoji=['','😴','😐','🙂','😊','🔥'];
+  el.innerHTML=STATE.progressLog.map(e=>`
+    <div class="card card-sm" style="margin-bottom:10px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="flex:1">
+          <div style="font-size:13px;margin-bottom:4px">${e.text}</div>
+          <div style="font-size:11px;color:var(--text3)">${e.date} · ${e.hours}h studied · Score: ${e.score} ${moodEmoji[e.mood]}</div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="deleteLog(${e.id})"><i class="fa fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+function deleteLog(id){STATE.progressLog=STATE.progressLog.filter(e=>e.id!==id);renderProgressLog();saveToStorage();}
+function clearLog(){STATE.progressLog=[];renderProgressLog();saveToStorage();showToast('Log cleared','info');}
+
+// ─── TABS ────────────────────────────────────────────────────────────
+function switchTab(section, tab){
+  document.querySelectorAll(`#page-${section} .tab-btn`).forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll(`#page-${section} .tab-content`).forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  const tabEl=document.getElementById(`tab-${section}-${tab}`);
+  if(tabEl)tabEl.classList.add('active');
+}
+
+// ─── AI ANALYSIS ─────────────────────────────────────────────────────
+function runAIAnalysis(){
+  showToast('🤖 Running full AI analysis…','info');
+  const btn=event.target;
+  const orig=btn.innerHTML;
+  btn.innerHTML='<div class="loading-spinner"></div> Analyzing…';
+  btn.disabled=true;
+  setTimeout(()=>{
+    STATE.score=Math.min(100,STATE.score+Math.round(Math.random()*5+2));
+    updateScoreRing(STATE.score);
+    renderCharts();
+    saveToStorage();
+    btn.innerHTML=orig;
+    btn.disabled=false;
+    showToast('✅ Analysis complete! Score updated.','success');
+    document.getElementById('last-updated').textContent='just now';
+  },2500);
+}
+
+// ─── TOAST ───────────────────────────────────────────────────────────
+function showToast(msg,type='info'){
+  const container=document.getElementById('toast-container');
+  const toast=document.createElement('div');
+  const icons={info:'circle-info',success:'circle-check',warning:'triangle-exclamation',error:'circle-xmark'};
+  toast.className=`toast ${type}`;
+  toast.innerHTML=`<i class="fa fa-${icons[type]||'circle-info'}"></i><span>${msg}</span>`;
+  container.appendChild(toast);
+  setTimeout(()=>toast.classList.add('show'),50);
+  setTimeout(()=>{toast.classList.remove('show');setTimeout(()=>toast.remove(),300);},3800);
+}
+</script>
+</body>
+</html>
